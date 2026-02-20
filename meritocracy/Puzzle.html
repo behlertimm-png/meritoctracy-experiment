@@ -1,0 +1,46 @@
+{% extends "global/Page.html" %}
+{% load otree %}
+
+{% block title %}
+Part 1: Puzzle {{ round_number }} of {{ num_rounds }}
+{% endblock %}
+
+{% block content %}
+
+<div style="text-align:center; margin-bottom: 20px;">
+    <img
+        src="/static/{{ puzzle_image }}"
+        style="
+            max-width: 900px;
+            width: 100%;
+            max-height: 55vh;
+            height: auto;
+            object-fit: contain;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        "
+    >
+</div>
+
+<div style="margin-bottom: 15px;">
+    <p><strong>Please select your answer (1–8):</strong></p>
+</div>
+
+{{ formfield 'answer' }}
+
+<!-- Hidden field that tells Python which button was clicked -->
+<input type="hidden" name="action" id="id_action" value="next">
+
+<div style="margin-top: 25px; display: flex; gap: 10px; align-items: center;">
+    <button class="btn btn-primary" type="submit"
+            onclick="document.getElementById('id_action').value='next';">
+        Next
+    </button>
+
+    <button type="submit" class="btn btn-outline-danger"
+            onclick="document.getElementById('id_action').value='stop';">
+        Stop Part 1 early
+    </button>
+</div>
+
+{% endblock %}

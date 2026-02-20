@@ -1,0 +1,31 @@
+{{ block title }}Consent{{ endblock }}
+
+{{ block content }}
+
+<p>
+This research study is conducted by researchers of the University of Hamburg and Vienna University of Economics and Business to understand decision making.
+</p>
+
+<p>
+The study takes on average between 10–20 minutes to complete.
+</p>
+
+<p>
+We will pay you {{ session.config.participation_fee }} for completing this study.
+In addition, you can earn a bonus payment (up to {{ session.config.bonus_cap }}) that depends on your decisions and answers, as we will explain later.
+You will be compensated for your participation only if you complete the study.
+</p>
+
+<p>
+Your participation is voluntary, and you can withdraw from the study at any point.
+All responses are confidential and will be stored on secured servers.
+Results may include summary data, but you will remain fully anonymous.
+</p>
+
+<p>
+If you give your consent to participate, please click “Next”.
+Thank you very much for your time and support!
+</p>
+
+{{ next_button }}
+{{ endblock }}

@@ -1,0 +1,43 @@
+{{ block title }}Finished{{ endblock }}
+
+{{ block content }}
+
+<p>Thank you for participating.</p>
+
+<h4>Your results</h4>
+<ul>
+  <li>Total correct in Part 1: <strong>{{ player.total_correct }}</strong></li>
+  <li>Outcome: 
+    <strong>
+      {{ if player.id_in_group == group.final_winner }}
+        Won
+      {{ else }}
+        Lost
+      {{ endif }}
+    </strong>
+  </li>
+</ul>
+
+<h4>Comprehension bonus</h4>
+<ul>
+  <li>Correct answers: <strong>{{ player.comp_correct }}</strong> out of 4</li>
+  <li>Bonus amount: <strong>{{ player.comp_bonus_amount }}</strong></li>
+</ul>
+
+<h4>Belief bonus</h4>
+<ul>
+  <li>Bonus earned: 
+    <strong>
+      {{ if player.belief_bonus_earned }}
+        Yes
+      {{ else }}
+        No
+      {{ endif }}
+    </strong>
+  </li>
+  <li>Belief bonus amount: <strong>{{ player.belief_bonus_amount }}</strong></li>
+</ul>
+
+<p>You can now close this window.</p>
+
+{{ endblock }}

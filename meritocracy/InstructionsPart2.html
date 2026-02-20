@@ -1,0 +1,45 @@
+{{ block title }}Instructions – Part 2{{ endblock }}
+
+{{ block content }}
+
+<p>
+Thank you for your effort. We will now start Part 2.
+</p>
+
+<p>
+First, the computer will randomly select either you or your paired participant. Each of you is equally likely to be selected.
+</p>
+
+<p><strong>Your earnings from this part are determined as follows:</strong></p>
+
+<ul>
+  <li>
+    With some unknown chance <strong>p</strong>, the computer will intervene and declare the selected person the tournament winner,
+    regardless of their performance in Part 1. The winner receives a bonus of <strong>{{ session.config.prize }}</strong>.
+  </li>
+  <li>
+    With the remaining chance <strong>(1-p)</strong>, the computer does not intervene. In this case, the outcome is determined exactly as in Part 1:
+    the person who solved more puzzles in Part 1 wins again and receives <strong>{{ session.config.prize }}</strong>.
+    In the case of a tie, the winner is randomly determined.
+  </li>
+</ul>
+
+<p><strong>Examples</strong></p>
+<ul>
+  <li>
+    If p is 20%, then in 20 out of 100 cases the computer intervenes, and the randomly selected person by the computer wins regardless of performance.
+    In the remaining 80 out of 100 cases, the computer does not intervene, and the winner is determined by performance in Part 1.
+  </li>
+  <li>
+    If p is 75%, then in 75 out of 100 cases the computer intervenes, and the randomly selected person by the computer wins regardless of performance.
+    In the remaining 25 out of 100 cases, the winner is determined by performance in Part 1.
+  </li>
+</ul>
+
+<p>
+In the next screen, you will answer comprehension questions about Part 2.
+You will receive <strong>{{ session.config.comp_pay_per_correct }}</strong> for each correct answer.
+</p>
+
+{{ next_button }}
+{{ endblock }}
