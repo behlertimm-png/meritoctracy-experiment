@@ -2,45 +2,133 @@
 {% load otree %}
 
 {% block title %}
-Part 1: Puzzle {{ round_number }} of {{ num_rounds }}
+Part 1: Puzzle {{ round_number }}
 {% endblock %}
 
 {% block content %}
 
-<div style="text-align:center; margin-bottom: 20px;">
-    <img
-        src="/static/{{ puzzle_image }}"
-        style="
-            max-width: 900px;
-            width: 100%;
-            max-height: 55vh;
-            height: auto;
-            object-fit: contain;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-        "
-    >
-</div>
+<style>
+  /* Reduce global horizontal margin for THIS page only */
+  .otree-body .container {
+    max-width: 1500px !important;
+  }
 
-<div style="margin-bottom: 15px;">
-    <p><strong>Please select your answer (1–8):</strong></p>
-</div>
+  /* Hide timer until moved */
+  .otree-timer {
+    visibility: hidden;
+  }
 
-{{ formfield 'answer' }}
+  .puzzle-grid {
+    display: grid;
+    grid-template-columns: 2.4fr 1.2fr;  /* widen right panel */
+    gap: 14px;
+    align-items: start;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
 
-<!-- Hidden field that tells Python which button was clicked -->
-<input type="hidden" name="action" id="id_action" value="next">
+  @media (max-width: 992px) {
+    .puzzle-grid {
+      grid-template-columns: 1fr;
+    }
+  }
 
-<div style="margin-top: 25px; display: flex; gap: 10px; align-items: center;">
-    <button class="btn btn-primary" type="submit"
-            onclick="document.getElementById('id_action').value='next';">
+  .puzzle-card,
+  .answers-card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 8px;          /* slightly tighter */
+    background: #fff;
+  }
+
+  .puzzle-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 8px;
+  }
+
+  @media (min-width: 993px) {
+    .answers-card {
+      position: sticky;
+      top: 10px;
+    }
+  }
+
+  #timer-slot .otree-timer {
+    visibility: visible;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 6px 8px;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .answers-card .form-group {
+    margin-bottom: 0;
+  }
+
+  /* Reduce line breaks in answer labels */
+  .answers-card label {
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+  }
+
+  .actions {
+    margin-top: 10px;
+    display: grid;
+    gap: 8px;
+  }
+
+  .actions .btn {
+    width: 100%;
+  }
+</style>
+
+<div class="puzzle-grid">
+  <div class="puzzle-card">
+    <img class="puzzle-img" src="/static/{{ puzzle_image }}" alt="Puzzle image">
+  </div>
+
+  <div class="answers-card">
+    <!-- Timer will be moved here -->
+    <div id="timer-slot"></div>
+
+    <div style="margin-bottom: 8px;">
+      <strong>Identify the missing image (1–8):</strong>
+    </div>
+
+    {{ formfield 'answer' }}
+    {{ formfield_errors 'answer' }}
+
+    <input type="hidden" name="action" id="id_action" value="next">
+
+    <div class="actions">
+      <button class="btn btn-primary"
+              type="submit"
+              onclick="document.getElementById('id_action').value='next';">
         Next
-    </button>
+      </button>
 
-    <button type="submit" class="btn btn-outline-danger"
-            onclick="document.getElementById('id_action').value='stop';">
-        Stop Part 1 early
-    </button>
+      <button class="btn btn-outline-danger"
+              type="submit"
+              onclick="document.getElementById('id_action').value='stop';">
+        Stop Part 1 and continue to Part 2
+      </button>
+    </div>
+  </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const timer = document.querySelector('.otree-timer');
+    const slot = document.getElementById('timer-slot');
+
+    if (timer && slot) {
+      slot.appendChild(timer);
+      timer.style.visibility = 'visible';
+    }
+  });
+</script>
 
 {% endblock %}

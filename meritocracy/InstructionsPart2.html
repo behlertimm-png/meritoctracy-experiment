@@ -2,44 +2,129 @@
 
 {{ block content }}
 
-<p>
-Thank you for your effort. We will now start Part 2.
-</p>
+<style>
+  .reveal-section {
+    display: none;
+    margin-bottom: 20px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #e6e6e6;  /* subtle separator */
+  }
 
-<p>
-First, the computer will randomly select either you or your paired participant. Each of you is equally likely to be selected.
-</p>
+  /* Remove border from the last section */
+  .reveal-section:last-of-type {
+    border-bottom: none;
+  }
 
-<p><strong>Your earnings from this part are determined as follows:</strong></p>
+  .reveal-controls {
+    margin-top: 18px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
 
-<ul>
-  <li>
-    With some unknown chance <strong>p</strong>, the computer will intervene and declare the selected person the tournament winner,
-    regardless of their performance in Part 1. The winner receives a bonus of <strong>{{ session.config.prize }}</strong>.
-  </li>
-  <li>
-    With the remaining chance <strong>(1-p)</strong>, the computer does not intervene. In this case, the outcome is determined exactly as in Part 1:
-    the person who solved more puzzles in Part 1 wins again and receives <strong>{{ session.config.prize }}</strong>.
-    In the case of a tie, the winner is randomly determined.
-  </li>
-</ul>
+  /* Slight visual weight for newly revealed sections */
+  .reveal-section p:first-child {
+    margin-top: 0;
+  }
+</style>
 
-<p><strong>Examples</strong></p>
-<ul>
-  <li>
-    If p is 20%, then in 20 out of 100 cases the computer intervenes, and the randomly selected person by the computer wins regardless of performance.
-    In the remaining 80 out of 100 cases, the computer does not intervene, and the winner is determined by performance in Part 1.
-  </li>
-  <li>
-    If p is 75%, then in 75 out of 100 cases the computer intervenes, and the randomly selected person by the computer wins regardless of performance.
-    In the remaining 25 out of 100 cases, the winner is determined by performance in Part 1.
-  </li>
-</ul>
+<!-- SECTION 1 -->
+<div id="sec1" class="reveal-section">
+  <p>
+    Thank you for your effort. We will now start Part 2.
+  </p>
 
-<p>
-In the next screen, you will answer comprehension questions about Part 2.
-You will receive <strong>{{ session.config.comp_pay_per_correct }}</strong> for each correct answer.
-</p>
+  <p>
+    First, <strong>the computer will randomly select either you or your paired participant</strong>. Each of you is <strong>equally</strong> likely to be selected.
+  </p>
+</div>
 
-{{ next_button }}
+<!-- SECTION 2 -->
+<div id="sec2" class="reveal-section">
+  <p>Your earnings from this part are determined as follows:</p>
+
+  <ul>
+    <li>
+      With some <strong>unknown chance p</strong>, the computer will <strong>intervene</strong> and declare the selected person the tournament winner,
+      <strong>regardless of their performance in Part 1</strong>. The winner receives a bonus of <strong>{{ session.config.prize }}</strong>.
+    </li>
+    <li>
+      With the <strong>remaining chance (1-p)</strong>, the computer does not intervene. In this case, the outcome is determined exactly as in Part 1:
+      the person who solved more puzzles in Part 1 wins again and receives <strong>{{ session.config.prize }}</strong>.
+      In the case of a <strong>tie</strong>, the winner is randomly determined.
+    </li>
+  </ul>
+</div>
+
+<!-- SECTION 3 -->
+<div id="sec3" class="reveal-section">
+  <p><strong>Examples</strong></p>
+  <ul>
+    <li>
+      If p is 20%, then in 20 out of 100 cases the computer intervenes, and the randomly selected person by the computer wins regardless of performance.
+      In the remaining 80 out of 100 cases, the computer does not intervene, and the winner is determined by performance in Part 1.
+    </li>
+    <li>
+      If p is 75%, then in 75 out of 100 cases the computer intervenes, and the randomly selected person by the computer wins regardless of performance.
+      In the remaining 25 out of 100 cases, the winner is determined by performance in Part 1.
+    </li>
+  </ul>
+
+  <p>
+    In the next screen, you will answer comprehension questions about Part 2.
+    You will receive <strong>{{ session.config.comp_pay_per_correct }}</strong> for each correct answer.
+  </p>
+</div>
+
+<!-- CONTROLS -->
+<div class="reveal-controls">
+  <button type="button" id="continueBtn" class="btn btn-primary">
+    Continue
+  </button>
+
+  <span id="progressText" style="opacity: 0.8;"></span>
+</div>
+
+<!-- Real oTree Next button (hidden until all revealed) -->
+<div id="nextBtnWrapper" style="margin-top: 18px; display: none;">
+  {{ next_button }}
+</div>
+
+<script>
+  (function () {
+    const sections = [
+      document.getElementById('sec1'),
+      document.getElementById('sec2'),
+      document.getElementById('sec3'),
+    ];
+
+    const continueBtn = document.getElementById('continueBtn');
+    const nextBtnWrapper = document.getElementById('nextBtnWrapper');
+    const progressText = document.getElementById('progressText');
+
+    let revealed = 0; // index of the last visible section
+
+    function updateUI() {
+      sections.forEach((sec, i) => {
+        sec.style.display = (i <= revealed) ? 'block' : 'none';
+      });
+
+      progressText.textContent = `Step ${Math.min(revealed + 1, sections.length)} of ${sections.length}`;
+
+      if (revealed >= sections.length - 1) {
+        continueBtn.style.display = 'none';
+        nextBtnWrapper.style.display = 'block';
+      }
+    }
+
+    continueBtn.addEventListener('click', function () {
+      revealed = Math.min(revealed + 1, sections.length - 1);
+      updateUI();
+    });
+
+    // initial: show section 1
+    updateUI();
+  })();
+</script>
+
 {{ endblock }}

@@ -219,7 +219,19 @@ class Consent(Page):
         )
 
 
+class WelcomeToStudy(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+
 class InstructionsPart1(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+
+class InstructionsPart1Start(Page):
     @staticmethod
     def is_displayed(player: Player):
         return player.round_number == 1
@@ -419,7 +431,9 @@ class End(Page):
 
 page_sequence = [
     Consent,
+    WelcomeToStudy,
     InstructionsPart1,
+    InstructionsPart1Start,
     Puzzle,
     InstructionsPart2,
     Comprehension,
