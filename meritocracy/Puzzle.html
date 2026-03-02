@@ -7,40 +7,122 @@ Part 1: Puzzle {{ round_number }} of {{ num_rounds }}
 
 {% block content %}
 
-<div style="text-align:center; margin-bottom: 20px;">
-    <img
-        src="/static/{{ puzzle_image }}"
-        style="
-            max-width: 900px;
-            width: 100%;
-            max-height: 55vh;
-            height: auto;
-            object-fit: contain;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-        "
-    >
+<style>
+  .puzzle-wrap {
+    max-width: 900px;
+    margin: 0 auto 18px auto;
+  }
+
+  .img-container {
+    position: relative;
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .img-container img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* Clickable area covering the answer grid region (bottom part of image) */
+  .answer-overlay {
+    position: absolute;
+    left: 6%;
+    right: 6%;
+    /* These two numbers define where the 2x4 grid sits vertically.
+       If needed, we’ll tune them once after you test a few images. */
+    top: 58%;
+    bottom: 5%;
+
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 2%;
+  }
+
+  .answer-cell {
+    border-radius: 6px;
+    cursor: pointer;
+    /* invisible, but with hover feedback */
+    background: rgba(0,0,0,0);
+  }
+
+  .answer-cell:hover {
+    outline: 3px solid rgba(0, 123, 255, 0.5);
+    background: rgba(0, 123, 255, 0.08);
+  }
+
+  .controls {
+    max-width: 900px;
+    margin: 18px auto 0 auto;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .hint {
+    max-width: 900px;
+    margin: 0 auto 10px auto;
+  }
+</style>
+
+<div class="puzzle-wrap">
+  <div class="hint">
+    <p><strong>Click directly on the option (1–8) in the image.</strong></p>
+  </div>
+
+  <div class="img-container">
+    <img src="/static/{{ puzzle_image }}" alt="Puzzle image">
+
+    <!-- Transparent 2x4 clickable grid over the bottom answer region -->
+    <div class="answer-overlay" aria-label="Answer choices">
+      <div class="answer-cell" onclick="chooseAnswer(1)" title="Choose 1"></div>
+      <div class="answer-cell" onclick="chooseAnswer(2)" title="Choose 2"></div>
+      <div class="answer-cell" onclick="chooseAnswer(3)" title="Choose 3"></div>
+      <div class="answer-cell" onclick="chooseAnswer(4)" title="Choose 4"></div>
+
+      <div class="answer-cell" onclick="chooseAnswer(5)" title="Choose 5"></div>
+      <div class="answer-cell" onclick="chooseAnswer(6)" title="Choose 6"></div>
+      <div class="answer-cell" onclick="chooseAnswer(7)" title="Choose 7"></div>
+      <div class="answer-cell" onclick="chooseAnswer(8)" title="Choose 8"></div>
+    </div>
+  </div>
+
+  <!-- Hidden fields that oTree will read -->
+  <input type="hidden" name="answer" id="id_answer" value="">
+  <input type="hidden" name="action" id="id_action" value="next">
+
+  <!-- If answer is missing and you submit (e.g., stop), this shows any validation errors -->
+  {{ formfield_errors 'answer' }}
 </div>
 
-<div style="margin-bottom: 15px;">
-    <p><strong>Please select your answer (1–8):</strong></p>
-</div>
-
-{{ formfield 'answer' }}
-
-<!-- Hidden field that tells Python which button was clicked -->
-<input type="hidden" name="action" id="id_action" value="next">
-
-<div style="margin-top: 25px; display: flex; gap: 10px; align-items: center;">
-    <button class="btn btn-primary" type="submit"
-            onclick="document.getElementById('id_action').value='next';">
-        Next
+<div class="controls">
+  <div>
+    <!-- Optional manual next (kept as fallback). If answer is blank, it will just submit blank. -->
+    <button class="btn btn-primary" type="submit" onclick="document.getElementById('id_action').value='next';">
+      Next
     </button>
+  </div>
 
-    <button type="submit" class="btn btn-outline-danger"
+  <div>
+    <button type="submit"
+            class="btn btn-outline-danger"
             onclick="document.getElementById('id_action').value='stop';">
-        Stop Part 1 early
+      Stop Part 1 early
     </button>
+  </div>
 </div>
+
+<script>
+  function chooseAnswer(n) {
+    document.getElementById('id_answer').value = String(n);
+    document.getElementById('id_action').value = 'next';
+    document.querySelector('form').submit();
+  }
+</script>
 
 {% endblock %}
