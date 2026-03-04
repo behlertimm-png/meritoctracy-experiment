@@ -1,0 +1,138 @@
+{% extends "otree/Page.html" %}
+{% block title %}Camera check{% endblock %}
+
+{% block content %}
+
+<p>
+  Please click the button below to enable your webcam. We only record whether it worked (not the video itself).
+</p>
+
+<button type="button" id="btnEnable" class="btn btn-primary">
+  Enable webcam
+</button>
+
+<div id="status" style="margin-top: 1rem;"></div>
+
+<div style="margin-top: 1rem; max-width: 360px;">
+  <video id="preview" autoplay playsinline muted style="width: 100%; display:none; border-radius: 8px;"></video>
+</div>
+
+<!-- Hidden inputs bound to oTree form fields -->
+<input type="hidden" name="webcam_success" id="webcam_success" value="False">
+<!-- default to not_attempted so your data is unambiguous -->
+<input type="hidden" name="webcam_error" id="webcam_error" value="not_attempted">
+
+<div style="margin-top: 1.5rem;">
+  {% next_button %}
+</div>
+
+<script>
+(() => {
+  const btnEnable = document.getElementById('btnEnable');
+  const statusEl = document.getElementById('status');
+  const videoEl = document.getElementById('preview');
+
+  const inpSuccess = document.getElementById('webcam_success');
+  const inpError = document.getElementById('webcam_error');
+
+  // oTree's real "Next" button
+  const nextBtn = document.querySelector('.otree-btn-next');
+
+  // Disable Next at first (so they can't proceed without at least trying once)
+  if (nextBtn) nextBtn.disabled = true;
+
+  let stream = null;
+  let webcamEnabled = false;
+  let requestInProgress = false;
+
+  function setStatus(msg) {
+    statusEl.textContent = msg;
+  }
+
+  async function enableWebcam() {
+    // prevent double-clicks / multiple overlapping requests
+    if (requestInProgress) return;
+    if (webcamEnabled) return;
+
+    requestInProgress = true;
+    inpError.value = "attempted"; // will be overwritten with success or an error code
+
+    // Feature detection
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      inpSuccess.value = "False";
+      inpError.value = "getUserMedia_not_supported";
+      setStatus("Your browser does not support webcam access.");
+      if (nextBtn) nextBtn.disabled = false;
+      requestInProgress = false;
+      return;
+    }
+
+    try {
+      setStatus("Requesting webcam permission…");
+
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: false
+      });
+
+      // success: lock in success so later errors can't overwrite it
+      webcamEnabled = true;
+
+      inpSuccess.value = "True";
+      inpError.value = "";
+      setStatus("Webcam enabled ✓");
+
+      videoEl.srcObject = stream;
+      videoEl.style.display = "block";
+
+      // prevent re-click overwriting success
+      btnEnable.disabled = true;
+      btnEnable.textContent = "Webcam enabled";
+
+      if (nextBtn) nextBtn.disabled = false;
+
+    } catch (err) {
+      // failure
+      inpSuccess.value = "False";
+      const errName = (err && (err.name || err.message)) ? (err.name || err.message) : "unknown_error";
+      inpError.value = errName;
+
+      // Show a useful message + include the error name for diagnosis
+      if (err && err.name === "NotAllowedError") {
+        setStatus("Permission denied. Please allow camera access in your browser (Error: NotAllowedError).");
+      } else if (err && err.name === "NotFoundError") {
+        setStatus("No webcam found on this device (Error: NotFoundError).");
+      } else if (err && err.name === "NotReadableError") {
+        setStatus("Webcam is in use by another app (Error: NotReadableError). Please close other apps and try again.");
+      } else if (err && err.name === "SecurityError") {
+        setStatus("Webcam blocked for security reasons (Error: SecurityError). Make sure you are on HTTPS.");
+      } else {
+        setStatus("Webcam could not be enabled. Error: " + errName);
+      }
+
+      // Allow them to proceed even if it failed (your stated preference)
+      if (nextBtn) nextBtn.disabled = false;
+    } finally {
+      requestInProgress = false;
+    }
+  }
+
+  // Stop camera when leaving/submitting (privacy-friendly)
+  function stopStream() {
+    if (stream) {
+      stream.getTracks().forEach(t => t.stop());
+      stream = null;
+    }
+  }
+
+  btnEnable.addEventListener('click', enableWebcam);
+
+  // Stop stream on page unload
+  window.addEventListener('beforeunload', stopStream);
+
+  // Stop stream when submitting the form
+  if (nextBtn) nextBtn.addEventListener('click', stopStream);
+})();
+</script>
+
+{% endblock %}

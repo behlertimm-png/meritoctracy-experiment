@@ -197,9 +197,17 @@ class Player(BasePlayer):
 )
 
 
+    
+
     true_no_intervention = models.IntegerField(initial=0)
     belief_bonus_earned = models.BooleanField(initial=False)
     belief_bonus_amount = models.CurrencyField(initial=0)
+
+
+    # --- Webcam check ---
+    webcam_success = models.BooleanField(initial=False)
+    webcam_error = models.LongStringField(blank=True)
+    webcam_prompted = models.BooleanField(initial=False)
 
 
 
@@ -417,6 +425,18 @@ class DummyOutcome(Page):
         player.belief_bonus_amount = bonus if player.belief_bonus_earned else 0
 
 
+class WebcamCheck(Page):
+    form_model = 'player'
+    form_fields = ['webcam_success', 'webcam_error']
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == C.NUM_ROUNDS
+
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        player.webcam_prompted = True
+
 
 
 class End(Page):
@@ -439,5 +459,6 @@ page_sequence = [
     Comprehension,
     WaitForScoring,
     DummyOutcome,
+    WebcamCheck,
     End,
 ]
