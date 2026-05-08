@@ -1,0 +1,50 @@
+{{ block title }}Final Guess{{ endblock }}
+
+{{ block content }}
+
+<p>
+Finally, we want to ask you the following question.
+</p>
+
+<p>
+What do you think is the chance that you solved more puzzles than your paired participant in Part 1?
+</p>
+
+<p>
+Please choose a number on the slider below from 0% to 100%.
+</p>
+
+<ul>
+  <li>If you chose 100%, this means that you are absolutely certain that you solved more puzzles.</li>
+  <li>If you chose 0%, this means that you are absolutely certain you solved fewer puzzles.</li>
+</ul>
+
+<div style="margin-top: 24px;">
+  <input
+    type="range"
+    name="final_guess_more_puzzles"
+    min="0"
+    max="100"
+    step="1"
+    value="50"
+    id="finalGuessSlider"
+    style="width: 100%;"
+  >
+
+  <p style="margin-top: 10px;">
+    Your guess: <strong><span id="sliderValue">50</span>%</strong>
+  </p>
+</div>
+
+<script>
+  const slider = document.getElementById('finalGuessSlider');
+  const sliderValue = document.getElementById('sliderValue');
+
+  slider.addEventListener('input', function () {
+    sliderValue.textContent = slider.value;
+  });
+</script>
+
+{{ next_button }}
+
+{{ endblock }}

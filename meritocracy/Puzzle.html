@@ -2,25 +2,23 @@
 {% load otree %}
 
 {% block title %}
-Part 1: Puzzle {{ round_number }}
+Puzzle {{ round_number }}
 {% endblock %}
 
 {% block content %}
 
 <style>
-  /* Reduce global horizontal margin for THIS page only */
   .otree-body .container {
     max-width: 1500px !important;
   }
 
-  /* Hide timer until moved */
   .otree-timer {
     visibility: hidden;
   }
 
   .puzzle-grid {
     display: grid;
-    grid-template-columns: 2.4fr 1.2fr;  /* widen right panel */
+    grid-template-columns: 2.4fr 1.2fr;
     gap: 14px;
     align-items: start;
     max-width: 1400px;
@@ -37,7 +35,7 @@ Part 1: Puzzle {{ round_number }}
   .answers-card {
     border: 1px solid #ddd;
     border-radius: 10px;
-    padding: 8px;          /* slightly tighter */
+    padding: 8px;
     background: #fff;
   }
 
@@ -68,7 +66,6 @@ Part 1: Puzzle {{ round_number }}
     margin-bottom: 0;
   }
 
-  /* Reduce line breaks in answer labels */
   .answers-card label {
     margin-bottom: 6px;
     font-size: 0.95rem;
@@ -91,7 +88,6 @@ Part 1: Puzzle {{ round_number }}
   </div>
 
   <div class="answers-card">
-    <!-- Timer will be moved here -->
     <div id="timer-slot"></div>
 
     <div style="margin-bottom: 8px;">
@@ -105,7 +101,9 @@ Part 1: Puzzle {{ round_number }}
 
     <div class="actions">
       <button class="btn btn-primary"
+              id="nextPuzzleBtn"
               type="submit"
+              disabled
               onclick="document.getElementById('id_action').value='next';">
         Next
       </button>
@@ -127,6 +125,14 @@ Part 1: Puzzle {{ round_number }}
     if (timer && slot) {
       slot.appendChild(timer);
       timer.style.visibility = 'visible';
+    }
+
+    const nextBtn = document.getElementById('nextPuzzleBtn');
+
+    if (nextBtn) {
+      setTimeout(function () {
+        nextBtn.disabled = false;
+      }, 40000);
     }
   });
 </script>

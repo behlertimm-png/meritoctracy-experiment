@@ -1,4 +1,4 @@
-{{ block title }}Results{{ endblock }}
+{{ block title }}YourResults{{ endblock }}
 
 {{ block content }}
 
@@ -19,37 +19,26 @@
 <hr>
 
 <p>
-Recall that if the computer does <strong>not</strong> intervene, the winner in Part 2 is the person who solved more puzzles.
+Please recall: the chance that the <strong>Performance rule</strong> determines the winner is a randomly selected number between <strong>0%</strong> and <strong>100%</strong> (in increments of <strong>10%</strong>).
 </p>
 
 {{ if won }}
   <p>
-  What do you think is the chance that the computer did <strong>not</strong> intervene (and you won because you solved more puzzles)?
+  What do you think was the chance that the <strong>Performance rule</strong> determined the winner in your pair (meaning you won because you solved more puzzles)?
   </p>
 {{ else }}
   <p>
-  What do you think is the chance that the computer did <strong>not</strong> intervene (and you did not win because you solved fewer puzzles)?
+  What do you think was the chance that the <strong>Performance rule</strong> determined the winner in your pair (meaning you lost because you solved fewer puzzles)?
   </p>
 {{ endif }}
 
-<p>Please choose a number on the slider below from 0% to 100%.</p>
+<p>Please select one of the possible values below.</p>
 
-<ul>
-  <li>
-    If you chose 100%, this means that you are absolutely certain that the computer did not intervene
-    {{ if won }}and you solved more puzzles{{ else }}and you solved fewer puzzles{{ endif }}.
-  </li>
-  <li>
-    If you chose 0%, this means that you are absolutely certain the computer intervened.
-  </li>
-</ul>
-
+{{ formfield 'belief_p_performance' }}
 
 <p>
-If your guess is within ± 5 of the true chance, you will win an additional bonus in this part.
+If your guess is correct, you will receive an additional bonus of <strong>${{ belief_bonus_formatted }}</strong>.
 </p>
-
-{{ formfield 'belief_no_intervention' }}
 
 <div style="margin-top: 16px;">
   {{ next_button }}

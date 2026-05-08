@@ -1,13 +1,14 @@
-{{ block title }}Comprehension Questions{{ endblock }}
+{{ block title }}{{ endblock }}
 
 {{ block content }}
 
 <p>
-Please answer the following questions about Part 2.
-You will receive <strong>{{ session.config.comp_pay_per_correct }}</strong> for each correct answer.
+Please answer all questions correctly before continuing.
+If an answer is incorrect, the correct answer will be shown and you can revise it.
 </p>
 
 {{ formfields }}
 
 {{ next_button }}
+
 {{ endblock }}

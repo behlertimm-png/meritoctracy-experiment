@@ -1,26 +1,176 @@
-{{ block title }}Instructions – Part 1{{ endblock }}
+{{ block title }}Instructions to Part 1{{ endblock }}
 
 {{ block content }}
 
+<style>
+  .reveal-section {
+    display: none;
+    margin-bottom: 20px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #e6e6e6;
+  }
+
+  .reveal-section:last-of-type {
+    border-bottom: none;
+  }
+
+  .reveal-controls {
+    margin-top: 18px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+</style>
+
+
+<!-- SECTION 1 -->
+<div id="sec1" class="reveal-section">
+
 <p>
-In Part 1, you will be asked to solve a series of puzzles. Each puzzle consists of eight images, with one image missing.
-You will identify the missing image that completes the pattern in each puzzle.
+This study has two parts. At the end of the study, one part will be randomly selected to determine your <strong>bonus</strong> earnings.
 </p>
 
 <p>
-To determine your bonus earnings in this part, you will be paired with another participant of the study.
-Your earnings depend on your performance relative to that of your paired participant as follows:
+<strong>Please do not use AI tools.</strong>
+Their use provides <strong>no advantage in your final payoff</strong> in this study.
+Submissions flagged for AI use are subject to review and may be disqualified from payment.
+</p>
+
+</div>
+
+
+
+<!-- SECTION 2 -->
+<div id="sec2" class="reveal-section">
+
+{{ if session.config.framing == 'iq' }}
+<p>
+In Part 1, you will be asked to solve <strong>puzzles</strong>, which are commonly used to measure <strong>intelligence</strong> (IQ).
+Each puzzle consists of eight images, with one image missing.
+You will <strong>identify the missing image</strong> that completes the pattern in each puzzle.
+</p>
+{{ else }}
+<p>
+In Part 1, you will answer a <strong>questionnaire</strong>.
+Each question consists of eight images, with one image missing.
+You will <strong>identify the missing image</strong> that completes the pattern in each question.
+</p>
+{{ endif }}
+
+<p>
+For example, examine the following sequence of images:
+</p>
+
+<div style="text-align: center; margin: 20px 0;">
+  <img
+    src="{{ static 'meritocracy/example.gif' }}"
+    style="max-width: 350px; width: 100%; height: auto;"
+  >
+</div>
+
+<p>
+In the example above, the correct answer is image 3, as this image best completes the pattern.
+</p>
+
+<p>
+In this task, you can work on as many puzzles as you like — the total number of puzzles <strong>exceeds</strong> what most participants can complete.
+</p>
+
+<p>
+To determine your bonus earnings in this part, you will be <strong>paired with another participant</strong> in this study.
+Your bonus depends on how your performance compares to theirs.
 </p>
 
 <ul>
-  <li>
-    If you correctly solve a larger number of puzzles than your paired participant, you will win and receive a bonus of
-    <strong>{{ session.config.prize }}</strong>.
-  </li>
-  <li>
-    If there is a tie (that is, each of you solves the same number of puzzles), each of you is equally likely to win.
-  </li>
+<li>
+If you <strong>correctly solve a larger number of puzzles</strong> than your paired participant,
+you will win and receive a bonus of
+<strong>{{ session.config.prize }}</strong>.
+</li>
+
+<li>
+If there is a <strong>tie</strong> (that is, each of you solves the same number of puzzles),
+each of you is <strong>equally</strong> likely to win.
+</li>
 </ul>
 
-{{ next_button }}
+</div>
+
+
+
+<!-- SECTION 3 -->
+<div id="sec3" class="reveal-section">
+
+<p>
+You will now start the task.
+In each puzzle, you have a <strong>time limit of 60 seconds</strong>.
+</p>
+
+<p>
+Note that you must spend <strong>at least 40 seconds</strong> on a puzzle before moving to the next one.
+</p>
+
+<p>
+You may stop solving puzzles <strong>at any time</strong> and continue with Part 2.
+</p>
+
+</div>
+
+
+
+<div class="reveal-controls">
+  <button type="button" id="continueBtn" class="btn btn-primary">
+    Continue
+  </button>
+
+  <span id="progressText" style="opacity:.8;"></span>
+</div>
+
+
+<div id="nextBtnWrapper" style="display:none; margin-top:18px;">
+  {{ next_button }}
+</div>
+
+
+<script>
+(function () {
+
+const sections = [
+ document.getElementById('sec1'),
+ document.getElementById('sec2'),
+ document.getElementById('sec3')
+];
+
+const continueBtn = document.getElementById('continueBtn');
+const nextBtnWrapper = document.getElementById('nextBtnWrapper');
+const progressText = document.getElementById('progressText');
+
+let revealed = 0;
+
+function updateUI(){
+
+ sections.forEach((sec,i)=>{
+   sec.style.display = (i <= revealed) ? 'block' : 'none';
+ });
+
+ progressText.textContent =
+   `Step ${Math.min(revealed+1,sections.length)} of ${sections.length}`;
+
+ if(revealed >= sections.length-1){
+   continueBtn.style.display='none';
+   nextBtnWrapper.style.display='block';
+ }
+
+}
+
+continueBtn.addEventListener('click',function(){
+ revealed = Math.min(revealed+1, sections.length-1);
+ updateUI();
+});
+
+updateUI();
+
+})();
+</script>
+
 {{ endblock }}

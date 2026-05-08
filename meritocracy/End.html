@@ -7,26 +7,42 @@
 <h4>Your results</h4>
 <ul>
   <li>Total correct in Part 1: <strong>{{ player.total_correct }}</strong></li>
-  <li>Outcome: 
+
+  <li>
+    Part 2 outcome:
     <strong>
-      {{ if player.id_in_group == group.final_winner }}
+      {{ if player.id_in_group == group.part2_winner }}
         Won
       {{ else }}
         Lost
       {{ endif }}
     </strong>
   </li>
-</ul>
 
-<h4>Comprehension bonus</h4>
-<ul>
-  <li>Correct answers: <strong>{{ player.comp_correct }}</strong> out of 4</li>
-  <li>Bonus amount: <strong>{{ player.comp_bonus_amount }}</strong></li>
+  <li>
+    Payoff-relevant part:
+    <strong>Part {{ group.paying_part }}</strong>
+  </li>
+
+  <li>
+    Competition bonus:
+    <strong>
+      {{ if player.id_in_group == group.paying_winner }}
+        {{ session.config.prize }}
+      {{ else }}
+        {{ 0 }}
+      {{ endif }}
+    </strong>
+  </li>
 </ul>
 
 <h4>Belief bonus</h4>
 <ul>
-  <li>Bonus earned: 
+  <li>Your guess: <strong>{{ player.belief_p_performance }}%</strong></li>
+  <li>True value: <strong>{{ player.true_p_performance }}%</strong></li>
+
+  <li>
+    Bonus earned:
     <strong>
       {{ if player.belief_bonus_earned }}
         Yes
@@ -35,7 +51,55 @@
       {{ endif }}
     </strong>
   </li>
+
   <li>Belief bonus amount: <strong>{{ player.belief_bonus_amount }}</strong></li>
+</ul>
+
+<h4>Total bonus payment</h4>
+<p>
+  Your total bonus payment is:
+  <strong>{{ player.payoff }}</strong>
+</p>
+
+<p>
+  This is in addition to the fixed participation fee.
+</p>
+
+<hr>
+
+<h4>Debug information (temporary — remove before launch)</h4>
+
+<ul>
+  <li>Your id in group: <strong>{{ player.id_in_group }}</strong></li>
+  <li>Your total correct: <strong>{{ player.total_correct }}</strong></li>
+
+  <li>Part 1 winner: <strong>{{ group.part1_winner }}</strong></li>
+
+  <li>Drawn p_performance: <strong>{{ group.p_performance }}%</strong></li>
+
+  <li>
+    Performance rule applied in Part 2:
+    <strong>
+      {{ if group.performance_rule_applies }}
+        Yes
+      {{ else }}
+        No
+      {{ endif }}
+    </strong>
+  </li>
+
+  <li>Random winner for Part 2: <strong>{{ group.random_winner }}</strong></li>
+  <li>Part 2 winner: <strong>{{ group.part2_winner }}</strong></li>
+
+  <li>Paying part: <strong>Part {{ group.paying_part }}</strong></li>
+  <li>Paying winner: <strong>{{ group.paying_winner }}</strong></li>
+
+  <li>Your belief guess: <strong>{{ player.belief_p_performance }}%</strong></li>
+  <li>True p_performance stored for you: <strong>{{ player.true_p_performance }}%</strong></li>
+  <li>Belief bonus earned: <strong>{{ player.belief_bonus_earned }}</strong></li>
+  <li>Belief bonus amount: <strong>{{ player.belief_bonus_amount }}</strong></li>
+
+  <li>Your final oTree payoff: <strong>{{ player.payoff }}</strong></li>
 </ul>
 
 <p>You can now close this window.</p>
