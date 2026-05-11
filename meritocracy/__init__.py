@@ -176,7 +176,7 @@ class Player(BasePlayer):
             [4, 'D. The participant who solved more puzzles in Part 1 wins'],
         ],
         widget=widgets.RadioSelect,
-        label="Q1. How does the Random rule determine the winner?",
+        label="<strong>Q1. How does the Random rule determine the winner?</strong>",
     )
 
     cq2 = models.IntegerField(
@@ -187,7 +187,7 @@ class Player(BasePlayer):
             [4, 'D. The computer cancels Part 2'],
         ],
         widget=widgets.RadioSelect,
-        label="Q2. If the Performance rule applies with a 100% chance, how is the winner determined?",
+        label="<strong>Q2. If the Performance rule applies with a 100% chance, how is the winner determined?</strong>",
     )
 
     cq3 = models.IntegerField(
@@ -198,7 +198,7 @@ class Player(BasePlayer):
             [4, 'D. No one wins'],
         ],
         widget=widgets.RadioSelect,
-        label="Q3. If the chance that the Performance rule applies is 0%, how is the winner determined?",
+        label="<strong>Q3. If the chance that the Performance rule applies is 0%, how is the winner determined?</strong>",
     )
 
     cq4 = models.IntegerField(
@@ -209,7 +209,7 @@ class Player(BasePlayer):
             [4, 'D. 100'],
         ],
         widget=widgets.RadioSelect,
-        label="Q4. Suppose the chance that the Performance rule applies is 30%. Out of 100 similar cases, in how many cases is the winner selected at random, regardless of Part 1 performance?",
+        label="<strong>Q4. Suppose the chance that the Performance rule applies is 30%. Out of 100 similar cases, in how many cases is the winner selected at random, regardless of Part 1 performance?</strong>",
     )
 
     cq5 = models.IntegerField(
@@ -218,7 +218,7 @@ class Player(BasePlayer):
             [2, 'B. No'],
         ],
         widget=widgets.RadioSelect,
-        label="Q5. If you solved fewer puzzles than your paired participant in Part 1, is it guaranteed that you will lose Part 2?",
+        label="<strong>Q5. If you solved fewer puzzles than your paired participant in Part 1, is it guaranteed that you will lose Part 2?</strong>",
     )
 
     comp_correct = models.IntegerField(initial=0)
