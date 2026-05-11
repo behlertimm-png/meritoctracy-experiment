@@ -49,6 +49,7 @@ That is, there are <strong>two possible rules</strong> to determine the winner:
 
 <p><strong>1) Performance rule:</strong></p>
 
+{{ if session.config.framing == 'iq' }}
 <ul>
   <li>
     The participant who <strong>solved more puzzles in Part 1</strong> wins and receives a bonus of
@@ -58,9 +59,21 @@ That is, there are <strong>two possible rules</strong> to determine the winner:
     If there is a <strong>tie</strong>, both participants are <strong>equally likely</strong> to win.
   </li>
 </ul>
+{{ else }}
+<ul>
+  <li>
+    The participant who <strong>solved more questions in Part 1</strong> wins and receives a bonus of
+    <strong>${{ prize_formatted }}</strong>.
+  </li>
+  <li>
+    If there is a <strong>tie</strong>, both participants are <strong>equally likely</strong> to win.
+  </li>
+</ul>
+{{ endif }}
 
 <p><strong>2) Random rule:</strong></p>
 
+{{ if session.config.framing == 'iq' }}
 <ul>
   <li>
     The computer <strong>randomly selects</strong> one of the two participants, giving each an equal chance of being selected.
@@ -70,6 +83,17 @@ That is, there are <strong>two possible rules</strong> to determine the winner:
     <strong>${{ prize_formatted }}</strong> — <strong>even if they solved fewer puzzles</strong> in Part 1.
   </li>
 </ul>
+{{ else }}
+<ul>
+  <li>
+    The computer <strong>randomly selects</strong> one of the two participants, giving each an equal chance of being selected.
+  </li>
+  <li>
+    The selected participant wins and receives a bonus of
+    <strong>${{ prize_formatted }}</strong> — <strong>even if they solved fewer questions</strong> in Part 1.
+  </li>
+</ul>
+{{ endif }}
 
 <p>
 To determine <strong>the chance that the Performance rule applies</strong>,
@@ -100,6 +124,7 @@ and the Random rule applies with a 60% chance.
 If the <strong>Performance rule</strong> applies with a <strong>20% chance</strong>, this can be interpreted as follows:
 </p>
 
+{{ if session.config.framing == 'iq' }}
 <ul>
   <li>
     In 20 out of 100 cases, the winner is the participant who solved more puzzles in Part 1.
@@ -109,11 +134,23 @@ If the <strong>Performance rule</strong> applies with a <strong>20% chance</stro
     giving both participants an equal chance.
   </li>
 </ul>
+{{ else }}
+<ul>
+  <li>
+    In 20 out of 100 cases, the winner is the participant who solved more questions in Part 1.
+  </li>
+  <li>
+    In the remaining 80 out of 100 cases, the computer selects the winner at random,
+    giving both participants an equal chance.
+  </li>
+</ul>
+{{ endif }}
 
 <p>
 If the <strong>Performance rule</strong> applies instead with an <strong>80% chance</strong>, this can be interpreted as follows:
 </p>
 
+{{ if session.config.framing == 'iq' }}
 <ul>
   <li>
     In 80 out of 100 cases, the winner is the participant who solved more puzzles in Part 1.
@@ -122,6 +159,16 @@ If the <strong>Performance rule</strong> applies instead with an <strong>80% cha
     In the remaining 20 out of 100 cases, the computer selects the winner at random.
   </li>
 </ul>
+{{ else }}
+<ul>
+  <li>
+    In 80 out of 100 cases, the winner is the participant who solved more questions in Part 1.
+  </li>
+  <li>
+    In the remaining 20 out of 100 cases, the computer selects the winner at random.
+  </li>
+</ul>
+{{ endif }}
 
 </div>
 
