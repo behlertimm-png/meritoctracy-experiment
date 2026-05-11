@@ -51,7 +51,7 @@ You will <strong>identify the missing image</strong> that completes the pattern 
 </p>
 {{ else }}
 <p>
-In Part 1, you will answer a <strong>questionnaire</strong>.
+In Part 1, you will solve a series of <strong>questions</strong>.
 Each question consists of eight images, with one image missing.
 You will <strong>identify the missing image</strong> that completes the pattern in each question.
 </p>
@@ -72,20 +72,25 @@ For example, examine the following sequence of images:
 In the example above, the correct answer is image 3, as this image best completes the pattern.
 </p>
 
+{{ if session.config.framing == 'iq' }}
 <p>
 In this task, you can work on as many puzzles as you like — the total number of puzzles <strong>exceeds</strong> what most participants can complete.
 </p>
-
+{{ else }}
+<p>
+In this task, you can work on as many questions as you like — the total number of questions <strong>exceeds</strong> what most participants can complete.
+</p>
+{{ endif }}
 <p>
 To determine your bonus earnings in this part, you will be <strong>paired with another participant</strong> in this study.
 Your bonus depends on how your performance compares to theirs.
 </p>
-
+{{ if session.config.framing == 'iq' }}
 <ul>
 <li>
 If you <strong>correctly solve a larger number of puzzles</strong> than your paired participant,
 you will win and receive a bonus of
-<strong>{{ session.config.prize }}</strong>.
+<strong>${{ prize_formatted }}</strong>.
 </li>
 
 <li>
@@ -93,27 +98,53 @@ If there is a <strong>tie</strong> (that is, each of you solves the same number 
 each of you is <strong>equally</strong> likely to win.
 </li>
 </ul>
+{{ else }}
+<ul>
+<li>
+If you <strong>correctly solve a larger number of questions</strong> than your paired participant,
+you will win and receive a bonus of
+<strong>${{ prize_formatted }}</strong>.
+</li>
 
+<li>
+If there is a <strong>tie</strong> (that is, each of you solves the same number of questions),
+each of you is <strong>equally</strong> likely to win.
+</li>
+</ul>
+{{ endif }}
 </div>
 
 
 
 <!-- SECTION 3 -->
 <div id="sec3" class="reveal-section">
-
+{{ if session.config.framing == 'iq' }}
 <p>
 You will now start the task.
 In each puzzle, you have a <strong>time limit of 60 seconds</strong>.
 </p>
+{{ else }}
+<p>
+You will now start the task.
+In each question, you have a <strong>time limit of 60 seconds</strong>.
+</p>
+{{ endif }}
 
+{{ if session.config.framing == 'iq' }}
 <p>
 Note that you must spend <strong>at least 40 seconds</strong> on a puzzle before moving to the next one.
 </p>
-
 <p>
 You may stop solving puzzles <strong>at any time</strong> and continue with Part 2.
 </p>
-
+{{ else }}
+<p>
+Note that you must spend <strong>at least 40 seconds</strong> on a question before moving to the next one.
+</p>
+<p>
+You may stop solving questions <strong>at any time</strong> and continue with Part 2.
+</p>
+{{ endif }}
 </div>
 
 

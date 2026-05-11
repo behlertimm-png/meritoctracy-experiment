@@ -1,9 +1,17 @@
 {% extends "global/Page.html" %}
 {% load otree %}
 
+
+
+{{ if session.config.framing == 'iq' }}
 {% block title %}
 Puzzle {{ round_number }}
 {% endblock %}
+{{ else }}
+{% block title %}
+Question {{ round_number }}
+{% endblock %}
+{{ endif }}
 
 {% block content %}
 

@@ -320,6 +320,13 @@ class InstructionsPart1(Page):
     def is_displayed(player: Player):
         return player.round_number == 1
 
+    @staticmethod
+    def vars_for_template(player: Player):
+        prize = player.session.config.get('prize')
+        return dict(
+            prize_formatted=f"{prize:.2f}",
+        )
+
 
 class InstructionsPart1Start(Page):
     @staticmethod
