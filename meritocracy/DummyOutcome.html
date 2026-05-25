@@ -1,47 +1,110 @@
-{{ block title }}YourResults{{ endblock }}
+{{ block title }}{{ endblock }}
 
 {{ block content }}
 
+<style>
+  .reveal-controls {
+    margin-top: 18px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  #revealedContent {
+    display: none;
+  }
+
+  .choice-row {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .choice-row label {
+    margin: 0;
+  }
+</style>
+
 <p>We will now tell you the result of Part 2.</p>
 
-{{ if won }}
-  <p><strong>You are the winner of Part 2.</strong></p>
-{{ else }}
-  <p><strong>You did not win in Part 2.</strong></p>
-{{ endif }}
-
-{{ if won }}
-  <img src="{{ static 'meritocracy/winner.png' }}" style="max-width: 400px; width: 100%; height: auto;">
-{{ else }}
-  <img src="{{ static 'meritocracy/loser.png' }}" style="max-width: 400px; width: 100%; height: auto;">
-{{ endif }}
-
-<hr>
-
-<p>
-Please recall: the chance that the <strong>Performance rule</strong> determines the winner is a randomly selected number between <strong>0%</strong> and <strong>100%</strong> (in increments of <strong>10%</strong>).
-</p>
-
-{{ if won }}
-  <p>
-  What do you think was the chance that the <strong>Performance rule</strong> determined the winner in your pair (meaning you won because you solved more puzzles)?
-  </p>
-{{ else }}
-  <p>
-  What do you think was the chance that the <strong>Performance rule</strong> determined the winner in your pair (meaning you lost because you solved fewer puzzles)?
-  </p>
-{{ endif }}
-
-<p>Please select one of the possible values below.</p>
-
-{{ formfield 'belief_p_performance' }}
-
-<p>
-If your guess is correct, you will receive an additional bonus of <strong>${{ belief_bonus_formatted }}</strong>.
-</p>
-
-<div style="margin-top: 16px;">
-  {{ next_button }}
+<div class="reveal-controls" id="revealControls">
+  <button type="button" id="continueBtn" class="btn btn-primary">
+    Continue
+  </button>
 </div>
+
+<div id="revealedContent">
+
+  {{ if won }}
+    <p><strong>You are the winner of Part 2.</strong></p>
+  {{ else }}
+    <p><strong>You did not win in Part 2.</strong></p>
+  {{ endif }}
+
+  {{ if won }}
+    <img src="{{ static 'meritocracy/winner.png' }}" style="max-width: 400px; width: 100%; height: auto;">
+  {{ else }}
+    <img src="{{ static 'meritocracy/loser.png' }}" style="max-width: 400px; width: 100%; height: auto;">
+  {{ endif }}
+
+  <hr>
+
+  <p>
+  Please recall: the chance that the <strong>Performance rule</strong> determines the winner is a randomly selected number between <strong>0%</strong> and <strong>100%</strong> (in increments of <strong>10%</strong>).
+  </p>
+
+  {{ if won }}
+    <p>
+    What do you think was the chance that the <strong>Performance rule</strong> determined the winner in your pair (meaning you won because you solved more {{ task_word }})?
+    </p>
+  {{ else }}
+    <p>
+    What do you think was the chance that the <strong>Performance rule</strong> determined the winner in your pair (meaning you lost because you solved fewer {{ task_word }})?
+    </p>
+  {{ endif }}
+
+  <p>Please select one of the possible values below.</p>
+
+  <div class="choice-row">
+  <label><input type="radio" name="belief_p_performance" value="0" required> 0%</label>
+  <label><input type="radio" name="belief_p_performance" value="10"> 10%</label>
+  <label><input type="radio" name="belief_p_performance" value="20"> 20%</label>
+  <label><input type="radio" name="belief_p_performance" value="30"> 30%</label>
+  <label><input type="radio" name="belief_p_performance" value="40"> 40%</label>
+  <label><input type="radio" name="belief_p_performance" value="50"> 50%</label>
+</div>
+
+<div class="choice-row">
+  <label><input type="radio" name="belief_p_performance" value="60"> 60%</label>
+  <label><input type="radio" name="belief_p_performance" value="70"> 70%</label>
+  <label><input type="radio" name="belief_p_performance" value="80"> 80%</label>
+  <label><input type="radio" name="belief_p_performance" value="90"> 90%</label>
+  <label><input type="radio" name="belief_p_performance" value="100"> 100%</label>
+</div>
+
+  <p>
+  If your guess is correct, you will receive an additional bonus of <strong>${{ belief_bonus_formatted }}</strong>.
+  </p>
+
+  <div style="margin-top: 16px;">
+    {{ next_button }}
+  </div>
+
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const continueBtn = document.getElementById('continueBtn');
+    const revealControls = document.getElementById('revealControls');
+    const revealedContent = document.getElementById('revealedContent');
+
+    continueBtn.addEventListener('click', function () {
+      revealedContent.style.display = 'block';
+      revealControls.style.display = 'none';
+    });
+  });
+</script>
 
 {{ endblock }}

@@ -1,6 +1,44 @@
-{{ block title }}Final Guess{{ endblock }}
+{{ block title }}{{ endblock }}
 
 {{ block content }}
+
+<style>
+  .mgslider-wrapper {
+    border-spacing: 10px;
+    width: 100%;
+  }
+
+  .mgslider-show {
+    text-align: center;
+  }
+
+  .mgslider-limit {
+    width: 10%;
+    min-width: 75px;
+    height: 40px;
+    text-align: center;
+    background: #eee;
+    border: 1px solid #888;
+  }
+
+  .mgslider-limit,
+  .mgslider-value {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .mgslider-before {
+    height: 16px;
+    width: 100%;
+    background: #1e5bff;
+    cursor: pointer;
+  }
+
+  .mgslider-feedback {
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+</style>
 
 <p>
 Finally, we want to ask you the following question.
@@ -15,33 +53,29 @@ Please choose a number on the slider below from 0% to 100%.
 </p>
 
 <ul>
-  <li>If you chose 100%, this means that you are absolutely certain that you solved more puzzles.</li>
-  <li>If you chose 0%, this means that you are absolutely certain you solved fewer puzzles.</li>
+  <li>
+    If you chose 100%, this means that you are absolutely certain that you solved more puzzles.
+  </li>
+  <li>
+    If you chose 0%, this means that you are absolutely certain you solved fewer puzzles.
+  </li>
 </ul>
 
-<div style="margin-top: 24px;">
-  <input
-    type="range"
-    name="final_guess_more_puzzles"
-    min="0"
-    max="100"
-    step="1"
-    value="50"
-    id="finalGuessSlider"
-    style="width: 100%;"
-  >
+<p>
+To reveal the slider, you must first click the blue bar.
+</p>
 
-  <p style="margin-top: 10px;">
-    Your guess: <strong><span id="sliderValue">50</span>%</strong>
-  </p>
-</div>
+{{ formfield_errors 'final_guess_more_puzzles' }}
+
+<div id="slider_here"></div>
+
+<script src="{{ static 'meritocracy/mgslider.js' }}"></script>
 
 <script>
-  const slider = document.getElementById('finalGuessSlider');
-  const sliderValue = document.getElementById('sliderValue');
-
-  slider.addEventListener('input', function () {
-    sliderValue.textContent = slider.value;
+  document.addEventListener('DOMContentLoaded', function () {
+    const slider = new mgslider("final_guess_more_puzzles", 0, 100, 1);
+    slider.yourvalue = "Your guess";
+    slider.print(document.getElementById("slider_here"));
   });
 </script>
 

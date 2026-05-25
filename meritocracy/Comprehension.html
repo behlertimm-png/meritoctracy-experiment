@@ -2,9 +2,20 @@
 
 {{ block content }}
 
+<style>
+  .alert-danger {
+    font-size: 0;
+  }
+
+  .alert-danger::before {
+    content: "Please review your errors and revise your answers.";
+    font-size: 1rem;
+  }
+</style>
+
 <p>
-Please answer all questions correctly before continuing.
-If an answer is incorrect, the correct answer will be shown and you can revise it.
+Please answer all questions correctly before proceeding.
+If an answer is incorrect, you must revise it before continuing.
 </p>
 
 {{ formfields }}

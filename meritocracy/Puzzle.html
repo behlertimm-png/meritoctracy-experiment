@@ -1,8 +1,6 @@
 {% extends "global/Page.html" %}
 {% load otree %}
 
-
-
 {{ if session.config.framing == 'iq' }}
 {% block title %}
 Puzzle {{ round_number }}
@@ -81,12 +79,43 @@ Question {{ round_number }}
 
   .actions {
     margin-top: 10px;
-    display: grid;
+    display: flex;
+    flex-direction: column;
     gap: 8px;
+    width: 100%;
   }
 
-  .actions .btn {
+  .actions button,
+  .actions .next-wrapper {
     width: 100%;
+  }
+
+  .next-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  .next-wrapper button {
+    width: 100%;
+  }
+
+  .next-tooltip-text {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    z-index: 1000;
+  }
+
+  .next-wrapper.locked:hover .next-tooltip-text {
+    display: block;
   }
 </style>
 
@@ -108,41 +137,69 @@ Question {{ round_number }}
     <input type="hidden" name="action" id="id_action" value="next">
 
     <div class="actions">
-      <button class="btn btn-primary"
-              id="nextPuzzleBtn"
-              type="submit"
-              disabled
-              onclick="document.getElementById('id_action').value='next';">
-        Next
-      </button>
+
+      <div class="next-wrapper locked" id="nextWrapper">
+        <button class="btn btn-primary"
+                id="nextPuzzleBtn"
+                type="submit"
+                style="opacity: 0.65; cursor: not-allowed;"
+                onclick="return handleNextClick(event);">
+          Next
+        </button>
+
+        <span class="next-tooltip-text">
+          You can move to the next puzzle after 40 seconds.
+        </span>
+      </div>
 
       <button class="btn btn-outline-danger"
               type="submit"
               onclick="document.getElementById('id_action').value='stop';">
         Stop Part 1 and continue to Part 2
       </button>
+
     </div>
   </div>
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const timer = document.querySelector('.otree-timer');
-    const slot = document.getElementById('timer-slot');
+let nextUnlocked = false;
 
-    if (timer && slot) {
-      slot.appendChild(timer);
-      timer.style.visibility = 'visible';
-    }
+function handleNextClick(event) {
+  if (!nextUnlocked) {
+    event.preventDefault();
+    return false;
+  }
 
-    const nextBtn = document.getElementById('nextPuzzleBtn');
+  document.getElementById('id_action').value = 'next';
+  return true;
+}
 
-    if (nextBtn) {
-      setTimeout(function () {
-        nextBtn.disabled = false;
-      }, 40000);
-    }
-  });
+document.addEventListener('DOMContentLoaded', function () {
+  const timer = document.querySelector('.otree-timer');
+  const slot = document.getElementById('timer-slot');
+
+  if (timer && slot) {
+    slot.appendChild(timer);
+    timer.style.visibility = 'visible';
+  }
+
+  const nextBtn = document.getElementById('nextPuzzleBtn');
+  const nextWrapper = document.getElementById('nextWrapper');
+
+  if (nextBtn) {
+    setTimeout(function () {
+      nextUnlocked = true;
+
+      nextBtn.style.opacity = '1';
+      nextBtn.style.cursor = 'pointer';
+
+      if (nextWrapper) {
+        nextWrapper.classList.remove('locked');
+      }
+    }, 40000);
+  }
+});
 </script>
 
 {% endblock %}

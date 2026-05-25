@@ -170,10 +170,10 @@ class Player(BasePlayer):
         # --- Comprehension questions (Part 2) ---
     cq1 = models.IntegerField(
         choices=[
-            [1, 'A. The participant with fewer mistakes wins'],
-            [2, 'B. The computer selects one of the two participants at random, giving each an equal chance.'],
-            [3, 'C. The winner is randomly selected based on Part 1 scores'],
-            [4, 'D. The participant who solved more puzzles in Part 1 wins'],
+            [1, 'The computer selects one of the two participants at random, giving each an equal chance.'],
+            [2, 'The participant with fewer mistakes wins'],
+            [3, 'The winner is randomly selected based on Part 1 scores'],
+            [4, 'The participant who solved more puzzles in Part 1 wins'],
         ],
         widget=widgets.RadioSelect,
         label="<strong>Q1. How does the Random rule determine the winner?</strong>",
@@ -181,10 +181,10 @@ class Player(BasePlayer):
 
     cq2 = models.IntegerField(
         choices=[
-            [1, 'A. The winner is randomly selected regardless of Part 1 performance'],
-            [2, 'B. The participant who solved more puzzles in Part 1 wins'],
-            [3, 'C. Both participants win'],
-            [4, 'D. The computer cancels Part 2'],
+            [1, 'The winner is randomly selected regardless of Part 1 performance'],
+            [2, 'The participant who solved more puzzles in Part 1 wins'],
+            [3, 'Both participants win'],
+            [4, 'The computer cancels Part 2'],
         ],
         widget=widgets.RadioSelect,
         label="<strong>Q2. If the Performance rule applies with a 100% chance, how is the winner determined?</strong>",
@@ -192,10 +192,10 @@ class Player(BasePlayer):
 
     cq3 = models.IntegerField(
         choices=[
-            [1, 'A. The participant who solved more puzzles in Part 1 wins'],
-            [2, 'B. The computer selects the winner at random, regardless of Part 1 performance'],
-            [3, 'C. The faster participant wins'],
-            [4, 'D. No one wins'],
+            [1, 'The participant who solved more puzzles in Part 1 wins'],
+            [2, 'The faster participant wins'],
+            [3, 'The computer selects the winner at random, regardless of Part 1 performance'],
+            [4, 'No one wins'],
         ],
         widget=widgets.RadioSelect,
         label="<strong>Q3. If the chance that the Performance rule applies is 0%, how is the winner determined?</strong>",
@@ -203,10 +203,10 @@ class Player(BasePlayer):
 
     cq4 = models.IntegerField(
         choices=[
-            [1, 'A. 30'],
-            [2, 'B. 70'],
-            [3, 'C. 50'],
-            [4, 'D. 100'],
+            [1, '30'],
+            [2, '100'],
+            [3, '50'],
+            [4, '70'],
         ],
         widget=widgets.RadioSelect,
         label="<strong>Q4. Suppose the chance that the Performance rule applies is 30%. Out of 100 similar cases, in how many cases is the winner selected at random, regardless of Part 1 performance?</strong>",
@@ -214,8 +214,8 @@ class Player(BasePlayer):
 
     cq5 = models.IntegerField(
         choices=[
-            [1, 'A. Yes'],
-            [2, 'B. No'],
+            [1, 'Yes'],
+            [2, 'No'],
         ],
         widget=widgets.RadioSelect,
         label="<strong>Q5. If you solved fewer puzzles than your paired participant in Part 1, is it guaranteed that you will lose Part 2?</strong>",
@@ -315,6 +315,17 @@ class WelcomeToStudy(Page):
         return player.round_number == 1
 
 
+
+
+class AIWarning(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+
+
+
+
 class InstructionsPart1(Page):
     @staticmethod
     def is_displayed(player: Player):
@@ -400,20 +411,20 @@ class Comprehension(Page):
     def error_message(player: Player, values):
         errors = {}
 
-        if values['cq1'] != 2:
-            errors['cq1'] = 'Incorrect. The correct answer is B: The computer selects one of the two participants at random, giving each an equal chance.'
+        if values['cq1'] != 1:
+            errors['cq1'] = 'Incorrect. According to the Random rule, the computer selects one of the two participants at random, giving each an equal chance.'
 
         if values['cq2'] != 2:
-            errors['cq2'] = 'Incorrect. The correct answer is B: The participant who solved more puzzles in Part 1 wins.'
+            errors['cq2'] = 'Incorrect. If the Performance rule applies with a 100% chance, the participant who solved more puzzles in Part 1 wins.'
 
-        if values['cq3'] != 2:
-            errors['cq3'] = 'Incorrect. The correct answer is B: The computer selects the winner at random, regardless of Part 1 performance.'
+        if values['cq3'] != 3:
+            errors['cq3'] = 'Incorrect. If the Performance rule applies with a 0% chance, the computer selects the winner at random, regardless of Part 1 performance.'
 
-        if values['cq4'] != 2:
-            errors['cq4'] = 'Incorrect. The correct answer is B: 70.'
+        if values['cq4'] != 4:
+            errors['cq4'] = 'Incorrect. If the Performance rule applies with a 30% chance, then the Random rule applies with a 70% chance. Thus, the winner is selected at random in 70 out of 100 similar cases.'
 
         if values['cq5'] != 2:
-            errors['cq5'] = 'Incorrect. The correct answer is B: No.'
+            errors['cq5'] = 'Incorrect. If you solved fewer puzzles than your paired participant in Part 1, you may still win in Part 2 if the Random rule applies and you are selected.'
 
         if errors:
             return errors
@@ -512,10 +523,17 @@ class DummyOutcome(Page):
     def vars_for_template(player: Player):
         won = (player.id_in_group == player.group.part2_winner)
         belief_bonus = player.session.config.get('belief_bonus')
+
+        task_word = (
+            "puzzles"
+            if player.session.config.get('framing') == 'iq'
+            else "questions"
+        )
             
         return dict(
             won=won,
             belief_bonus_formatted=f"{belief_bonus:.2f}",
+            task_word=task_word,
         )
 
     @staticmethod
@@ -572,6 +590,7 @@ class End(Page):
 page_sequence = [
     Consent,
     ConsentDeclined,
+    AIWarning,
     InstructionsPart1,
     Puzzle,
     InstructionsPart2,
