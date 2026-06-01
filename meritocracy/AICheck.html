@@ -1,0 +1,24 @@
+{{ block title }}{{ endblock }}
+
+{{ block content }}
+
+<p>
+Before we begin with Part 1, please watch the animation below and enter the four-digit number you see.
+</p>
+
+<div style="text-align: center; margin: 24px 0;">
+  <img src="{{ static ai_check_gif }}" style="max-width: 500px; width: 100%; height: auto;">
+</div>
+
+{{ formfield_errors 'ai_check_answer' }}
+
+<div style="margin-bottom: 20px;">
+    <input type="text"
+           name="ai_check_answer"
+           class="form-control"
+           autocomplete="off">
+</div>
+
+{{ next_button }}
+
+{{ endblock }}

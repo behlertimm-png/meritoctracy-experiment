@@ -254,11 +254,17 @@ class Player(BasePlayer):
         label="Your guess (0–100):",
     )
 
-    # --- Webcam check ---
+    # --- Webcam check (Archived/Unused) ---
     webcam_success = models.BooleanField(initial=False)
     webcam_error = models.LongStringField(blank=True)
     webcam_prompted = models.BooleanField(initial=False)
 
+
+
+    # --- AI Check ---
+    ai_check_answer = models.StringField(blank=True)
+    ai_check_correct = models.BooleanField(initial=False)
+    ai_check_code = models.StringField(blank=True)
 
 
 def set_payoffs(player: Player):
@@ -321,6 +327,30 @@ class AIWarning(Page):
     @staticmethod
     def is_displayed(player: Player):
         return player.round_number == 1
+
+
+
+
+class AICheck(Page):
+    form_model = 'player'
+    form_fields = ['ai_check_answer']
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        player.ai_check_code = '4719'
+        return dict(
+            ai_check_gif='meritocracy/ai_checks/ai_check.gif'
+        )
+
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        answer = player.ai_check_answer.strip()
+        player.ai_check_correct = (answer == player.ai_check_code)
+
 
 
 
@@ -591,6 +621,7 @@ page_sequence = [
     Consent,
     ConsentDeclined,
     AIWarning,
+    AICheck,
     InstructionsPart1,
     Puzzle,
     InstructionsPart2,

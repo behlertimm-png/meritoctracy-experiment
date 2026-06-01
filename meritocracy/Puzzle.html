@@ -85,6 +85,11 @@ Question {{ round_number }}
     width: 100%;
   }
 
+  .stop-button {
+    margin-top: 25px;
+  }
+
+  
   .actions button,
   .actions .next-wrapper {
     width: 100%;
@@ -152,11 +157,11 @@ Question {{ round_number }}
         </span>
       </div>
 
-      <button class="btn btn-outline-danger"
-              type="submit"
-              onclick="document.getElementById('id_action').value='stop';">
-        Stop Part 1 and continue to Part 2
-      </button>
+     <button class="btn btn-outline-danger stop-button"
+             type="submit"
+             onclick="document.getElementById('id_action').value='stop';">
+       Stop Part 1 and continue to Part 2
+     </button>
 
     </div>
   </div>
