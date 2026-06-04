@@ -1,0 +1,67 @@
+{{ block title }}{{ endblock }}
+
+{{ block content }}
+
+
+<p><strong>Examples</strong></p>
+
+<p>
+If the <strong>Performance rule</strong> applies with a <strong>20% chance</strong>, this can be interpreted as follows:
+</p>
+
+{{ if session.config.framing == 'iq' }}
+<ul>
+  <li>
+    In 20 out of 100 cases, the winner is the participant who solved more puzzles in Part 1.
+  </li>
+  <li>
+    In the remaining 80 out of 100 cases, the computer selects the winner at random,
+    giving both participants an equal chance.
+  </li>
+</ul>
+{{ else }}
+<ul>
+  <li>
+    In 20 out of 100 cases, the winner is the participant who solved more questions in Part 1.
+  </li>
+  <li>
+    In the remaining 80 out of 100 cases, the computer selects the winner at random,
+    giving both participants an equal chance.
+  </li>
+</ul>
+{{ endif }}
+
+<p>
+If the <strong>Performance rule</strong> applies instead with an <strong>80% chance</strong>, this can be interpreted as follows:
+</p>
+
+{{ if session.config.framing == 'iq' }}
+<ul>
+  <li>
+    In 80 out of 100 cases, the winner is the participant who solved more puzzles in Part 1.
+  </li>
+  <li>
+    In the remaining 20 out of 100 cases, the computer selects the winner at random.
+  </li>
+</ul>
+{{ else }}
+<ul>
+  <li>
+    In 80 out of 100 cases, the winner is the participant who solved more questions in Part 1.
+  </li>
+  <li>
+    In the remaining 20 out of 100 cases, the computer selects the winner at random.
+  </li>
+</ul>
+{{ endif }}
+
+<p>
+Next, you will answer comprehension questions about Part 2.
+</p>
+
+<div style="margin-top: 24px; display: flex; gap: 12px; align-items: center;">
+  {{ back_button }}
+  {{ next_button }}
+</div>
+
+{{ endblock }}

@@ -346,11 +346,22 @@ class AICheck(Page):
             ai_check_gif='meritocracy/ai_checks/ai_check.gif'
         )
 
+    
+    @staticmethod
+    def error_message(player: Player, values):
+        answer = values.get('ai_check_answer', '').strip()
+
+        if not answer.isdigit() or len(answer) != 4:
+            return 'Please enter a four-digit number.'
+
+
     @staticmethod
     def before_next_page(player: Player, timeout_happened):
         answer = player.ai_check_answer.strip()
         player.ai_check_correct = (answer == player.ai_check_code)
 
+    
+  
 
 
 
@@ -369,6 +380,29 @@ class InstructionsPart1(Page):
         )
 
 
+class InstructionsPart1Competition(Page):
+    allow_back_button = True
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        prize = player.session.config.get('prize')
+        return dict(
+            prize_formatted=f"{prize:.2f}",
+        )
+
+
+class InstructionsPart1Timing(Page):
+    allow_back_button = True
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+
 class InstructionsPart1Start(Page):
     @staticmethod
     def is_displayed(player: Player):
@@ -380,7 +414,7 @@ class Puzzle(Page):
     form_model = 'player'
     form_fields = ['answer', 'action']   # IMPORTANT
 
-    timeout_seconds = 60
+    timeout_seconds = 120
 
     @staticmethod
     def is_displayed(player: Player):
@@ -427,6 +461,37 @@ class InstructionsPart2(Page):
         return dict(
             prize_formatted=f"{prize:.2f}",
         )
+
+
+class InstructionsPart2Rules(Page):
+    allow_back_button = True
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == C.NUM_ROUNDS
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        prize = player.session.config.get('prize')
+        return dict(
+            prize_formatted=f"{prize:.2f}",
+        )
+
+class InstructionsPart2Probability(Page):
+    allow_back_button = True
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == C.NUM_ROUNDS
+
+
+class InstructionsPart2Examples(Page):
+    allow_back_button = True
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == C.NUM_ROUNDS
+
 
 
 class Comprehension(Page):
@@ -623,8 +688,13 @@ page_sequence = [
     AIWarning,
     AICheck,
     InstructionsPart1,
+    InstructionsPart1Competition,
+    InstructionsPart1Timing,
     Puzzle,
     InstructionsPart2,
+    InstructionsPart2Rules,
+    InstructionsPart2Probability,
+    InstructionsPart2Examples,
     Comprehension,
     Part2StartScreen,
     WaitForScoring,

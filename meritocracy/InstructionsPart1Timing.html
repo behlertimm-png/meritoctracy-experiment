@@ -1,0 +1,38 @@
+{{ block title }}{{ endblock }}
+
+{{ block content }}
+
+{{ if session.config.framing == 'iq' }}
+<p>
+You will now start the task.
+In each puzzle, you have a <strong>time limit of 120 seconds</strong>.
+</p>
+
+<p>
+Note that you must spend <strong>at least 30 seconds</strong> on a puzzle before moving to the next one.
+</p>
+
+<p>
+You may stop solving puzzles <strong>at any time</strong> and continue with Part 2.
+</p>
+{{ else }}
+<p>
+You will now start the task.
+In each question, you have a <strong>time limit of 120 seconds</strong>.
+</p>
+
+<p>
+Note that you must spend <strong>at least 30 seconds</strong> on a question before moving to the next one.
+</p>
+
+<p>
+You may stop solving questions <strong>at any time</strong> and continue with Part 2.
+</p>
+{{ endif }}
+
+<div style="margin-top: 24px; display: flex; gap: 12px; align-items: center;">
+  {{ back_button }}
+  {{ next_button }}
+</div>
+
+{{ endblock }}

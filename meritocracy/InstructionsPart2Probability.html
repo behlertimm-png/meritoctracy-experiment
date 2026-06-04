@@ -1,0 +1,25 @@
+{{ block title }}{{ endblock }}
+
+{{ block content }}
+
+<p>
+To determine <strong>the chance that the Performance rule applies</strong>,
+a number is randomly drawn from the following values (each equally likely):
+</p>
+
+<p style="text-align: center; font-size: 1.05em; margin-top: 18px; margin-bottom: 18px;">
+  0%, 10%, 20%, 30%, 40%, 50%, 60%, 70%, 80%, 90%, 100%
+</p>
+
+<p>
+The <strong>Random rule</strong> applies with the <strong>remaining chance</strong>.
+For example, if 40% is drawn, the Performance rule applies with a 40% chance,
+and the Random rule applies with a 60% chance.
+</p>
+
+<div style="margin-top: 24px; display: flex; gap: 12px; align-items: center;">
+  {{ back_button }}
+  {{ next_button }}
+</div>
+
+{{ endblock }}

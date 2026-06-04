@@ -1,0 +1,53 @@
+{{ block title }}{{ endblock }}
+
+{{ block content }}
+
+{{ if session.config.framing == 'iq' }}
+<p>
+In this task, you can work on as many puzzles as you like — the total number of puzzles <strong>exceeds</strong> what most participants can complete.
+</p>
+{{ else }}
+<p>
+In this task, you can work on as many questions as you like — the total number of questions <strong>exceeds</strong> what most participants can complete.
+</p>
+{{ endif }}
+
+<p>
+To determine your bonus earnings in this part, you will be <strong>paired with another participant</strong> in this study.
+Your bonus depends on how your performance compares to theirs.
+</p>
+
+{{ if session.config.framing == 'iq' }}
+<ul>
+  <li>
+    If you <strong>correctly solve a larger number of puzzles</strong> than your paired participant,
+    you will win and receive a bonus of
+    <strong>${{ prize_formatted }}</strong>.
+  </li>
+
+  <li>
+    If there is a <strong>tie</strong> (that is, each of you solves the same number of puzzles),
+    each of you is <strong>equally</strong> likely to win.
+  </li>
+</ul>
+{{ else }}
+<ul>
+  <li>
+    If you <strong>correctly solve a larger number of questions</strong> than your paired participant,
+    you will win and receive a bonus of
+    <strong>${{ prize_formatted }}</strong>.
+  </li>
+
+  <li>
+    If there is a <strong>tie</strong> (that is, each of you solves the same number of questions),
+    each of you is <strong>equally</strong> likely to win.
+  </li>
+</ul>
+{{ endif }}
+
+<div style="margin-top: 24px; display: flex; gap: 12px; align-items: center;">
+  {{ back_button }}
+  {{ next_button }}
+</div>
+
+{{ endblock }}
