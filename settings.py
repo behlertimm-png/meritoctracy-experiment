@@ -49,7 +49,7 @@ SESSION_CONFIGS = [
         name='meritocracy_random',
         display_name="Meritocracy RANDOM TREATMENT",
         app_sequence=['meritocracy'],
-        num_demo_participants=4,
+        num_demo_participants=8,
         belief_bonus=2.00,
         participation_fee=2.00,
     ),
