@@ -567,14 +567,21 @@ class Comprehension(Page):
         return player.round_number == C.NUM_ROUNDS and not player.participant.timed_out
 
     @staticmethod
+    def vars_for_template(player: Player):
+        task_word = "puzzles" if player.framing == "iq" else "questions"
+        return dict(task_word=task_word)
+
+    @staticmethod
     def error_message(player: Player, values):
         errors = {}
+
+        task_word = "puzzles" if player.framing == "iq" else "questions"
 
         if values['cq1'] != 1:
             errors['cq1'] = 'Incorrect. According to the Random rule, the computer selects one of the two participants at random, giving each an equal chance.'
 
         if values['cq2'] != 2:
-            errors['cq2'] = 'Incorrect. If the Performance rule applies with a 100% chance, the participant who solved more puzzles in Part 1 wins.'
+            errors['cq2'] = f'Incorrect. If the Performance rule applies with a 100% chance, the participant who solved more {task_word} in Part 1 wins.'
 
         if values['cq3'] != 3:
             errors['cq3'] = 'Incorrect. If the Performance rule applies with a 0% chance, the computer selects the winner at random, regardless of Part 1 performance.'
@@ -583,8 +590,7 @@ class Comprehension(Page):
             errors['cq4'] = 'Incorrect. If the Performance rule applies with a 30% chance, then the Random rule applies with a 70% chance. Thus, the winner is selected at random in 70 out of 100 similar cases.'
 
         if values['cq5'] != 2:
-            errors['cq5'] = 'Incorrect. If you solved fewer puzzles than your paired participant in Part 1, you may still win in Part 2 if the Random rule applies and you are selected.'
-
+            errors['cq5'] = f'Incorrect. If you solved fewer {task_word} than your paired participant in Part 1, you may still win in Part 2 if the Random rule applies and you are selected.'
         if errors:
             return errors
 
@@ -694,6 +700,12 @@ class WaitTimeout(Page):
 
 
 
+
+
+
+
+
+
 class DummyOutcome(Page):
     form_model = 'player'
     form_fields = ['belief_p_performance']
@@ -742,6 +754,29 @@ class Part2StartScreen(Page):
         return player.round_number == C.NUM_ROUNDS and not player.participant.timed_out
 
 
+
+
+class OutcomeCalculation(Page):
+
+    timeout_seconds = 7
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == C.NUM_ROUNDS
+
+    @staticmethod
+    def get_timeout_seconds(player: Player):
+        return 7
+
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        pass
+
+
+
+
+
+
 class WebcamCheck(Page):
     form_model = 'player'
     form_fields = ['webcam_success', 'webcam_error']
@@ -787,6 +822,7 @@ page_sequence = [
     InstructionsPart2Examples,
     Comprehension,
     Part2StartScreen,
+    OutcomeCalculation,
     DummyOutcome,
     FinalGuess,
     # WebcamCheck,

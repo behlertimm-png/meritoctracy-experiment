@@ -11,6 +11,19 @@
     content: "Please review your errors and revise your answers.";
     font-size: 1rem;
   }
+
+  .comp-question {
+    margin-bottom: 24px;
+  }
+
+  .comp-question p {
+    margin-bottom: 8px;
+  }
+
+  .comp-options label {
+    display: block;
+    margin-bottom: 6px;
+  }
 </style>
 
 <p>
@@ -18,7 +31,58 @@ Please answer all questions correctly before proceeding.
 If an answer is incorrect, you must revise it before continuing.
 </p>
 
-{{ formfields }}
+<div class="comp-question">
+  <p><strong>Q1. How does the Random rule determine the winner?</strong></p>
+  <div class="comp-options">
+    <label><input type="radio" name="cq1" value="1" required> The computer selects one of the two participants at random, giving each an equal chance.</label>
+    <label><input type="radio" name="cq1" value="2"> The participant with fewer mistakes wins</label>
+    <label><input type="radio" name="cq1" value="3"> The winner is randomly selected based on Part 1 scores</label>
+    <label><input type="radio" name="cq1" value="4"> The participant who solved more {{ task_word }} in Part 1 wins</label>
+  </div>
+  {{ formfield_errors 'cq1' }}
+</div>
+
+<div class="comp-question">
+  <p><strong>Q2. If the Performance rule applies with a 100% chance, how is the winner determined?</strong></p>
+  <div class="comp-options">
+    <label><input type="radio" name="cq2" value="1" required> The winner is randomly selected regardless of Part 1 performance</label>
+    <label><input type="radio" name="cq2" value="2"> The participant who solved more {{ task_word }} in Part 1 wins</label>
+    <label><input type="radio" name="cq2" value="3"> Both participants win</label>
+    <label><input type="radio" name="cq2" value="4"> The computer cancels Part 2</label>
+  </div>
+  {{ formfield_errors 'cq2' }}
+</div>
+
+<div class="comp-question">
+  <p><strong>Q3. If the chance that the Performance rule applies is 0%, how is the winner determined?</strong></p>
+  <div class="comp-options">
+    <label><input type="radio" name="cq3" value="1" required> The participant who solved more {{ task_word }} in Part 1 wins</label>
+    <label><input type="radio" name="cq3" value="2"> The faster participant wins</label>
+    <label><input type="radio" name="cq3" value="3"> The computer selects the winner at random, regardless of Part 1 performance</label>
+    <label><input type="radio" name="cq3" value="4"> No one wins</label>
+  </div>
+  {{ formfield_errors 'cq3' }}
+</div>
+
+<div class="comp-question">
+  <p><strong>Q4. Suppose the chance that the Performance rule applies is 30%. Out of 100 similar cases, in how many cases is the winner selected at random, regardless of Part 1 performance?</strong></p>
+  <div class="comp-options">
+    <label><input type="radio" name="cq4" value="1" required> 30</label>
+    <label><input type="radio" name="cq4" value="2"> 100</label>
+    <label><input type="radio" name="cq4" value="3"> 50</label>
+    <label><input type="radio" name="cq4" value="4"> 70</label>
+  </div>
+  {{ formfield_errors 'cq4' }}
+</div>
+
+<div class="comp-question">
+  <p><strong>Q5. If you solved fewer {{ task_word }} than your paired participant in Part 1, is it guaranteed that you will lose Part 2?</strong></p>
+  <div class="comp-options">
+    <label><input type="radio" name="cq5" value="1" required> Yes</label>
+    <label><input type="radio" name="cq5" value="2"> No</label>
+  </div>
+  {{ formfield_errors 'cq5' }}
+</div>
 
 {{ next_button }}
 
