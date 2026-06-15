@@ -1,10 +1,13 @@
 from otree.api import *
 import random
+import itertools
 
 
 doc = """
 Meritocracy experiment skeleton.
 """
+
+WAIT_PAGE_TIMEOUT = 5 * 60  # 5 minutes
 
 
 class C(BaseConstants):
@@ -95,9 +98,64 @@ class C(BaseConstants):
         2,  # IQ_36
     ]
 
-
 class Subsession(BaseSubsession):
     pass
+
+
+def creating_session(subsession):
+    print("creating_session called, round:", subsession.round_number, flush=True)
+    treatment_list = [
+        ['low_iq', 'low_iq'],
+        ['low_quest', 'low_quest'],
+        ['high_iq', 'high_iq'],
+        ['high_quest', 'high_quest'],
+    ]
+    random.shuffle(treatment_list)
+    treatment_list = list(itertools.chain.from_iterable(treatment_list))
+    treatment_cycle = itertools.cycle(treatment_list)
+
+    if subsession.round_number == 1:
+        for player in subsession.get_players():
+            player.participant.timed_out = False
+            if 'treatment' not in subsession.session.config:
+                print("Randomly assigning treatment for player", player.id_in_subsession)
+                player.treatment = next(treatment_cycle)
+            else:
+                player.treatment = subsession.session.config['treatment']
+            print("Treatment:", player.treatment)
+
+            if player.treatment == 'low_iq':
+                player.prize = 2
+                player.framing = 'iq'
+            elif player.treatment == 'low_quest':
+                player.prize = 2
+                player.framing = 'questionnaire'
+            elif player.treatment == 'high_iq':
+                player.prize = 12
+                player.framing = 'iq'
+            elif player.treatment == 'high_quest':
+                player.prize = 12
+                player.framing = 'questionnaire'
+    else:
+        for player in subsession.get_players():
+            p1 = player.in_round(1)
+            player.prize = p1.prize
+            player.framing = p1.framing
+            player.treatment = p1.treatment
+
+
+
+
+def group_by_arrival_time_method(_subsession, waiting_players):
+    low_iq = [p for p in waiting_players if p.treatment == 'low_iq']
+    low_quest = [p for p in waiting_players if p.treatment == 'low_quest']
+    high_iq = [p for p in waiting_players if p.treatment == 'high_iq']
+    high_quest = [p for p in waiting_players if p.treatment == 'high_quest']
+
+    for group in [low_iq, low_quest, high_iq, high_quest]:
+        if len(group) >= 2:
+            return group[:2]
+    return None
 
 
 class Group(BaseGroup):
@@ -131,6 +189,10 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
+    # --- Treatment variables ---
+    prize = models.IntegerField()
+    framing = models.StringField()
+    treatment = models.StringField()
     # --- Consent Form ---
 
     consent = models.StringField(
@@ -268,7 +330,7 @@ class Player(BasePlayer):
 
 
 def set_payoffs(player: Player):
-    prize = player.session.config.get('prize', 0)
+    prize = player.prize
 
     won_competition = player.id_in_group == player.group.paying_winner
 
@@ -295,7 +357,7 @@ class Consent(Page):
     @staticmethod
     def vars_for_template(player: Player):
 
-        prize = player.session.config.get('prize')
+        prize = player.prize
         belief_bonus = player.session.config.get('belief_bonus')
 
         return dict(
@@ -374,7 +436,7 @@ class InstructionsPart1(Page):
 
     @staticmethod
     def vars_for_template(player: Player):
-        prize = player.session.config.get('prize')
+        prize = player.prize
         return dict(
             prize_formatted=f"{prize:.2f}",
         )
@@ -389,7 +451,7 @@ class InstructionsPart1Competition(Page):
 
     @staticmethod
     def vars_for_template(player: Player):
-        prize = player.session.config.get('prize')
+        prize = player.prize
         return dict(
             prize_formatted=f"{prize:.2f}",
         )
@@ -418,6 +480,8 @@ class Puzzle(Page):
 
     @staticmethod
     def is_displayed(player: Player):
+        if player.participant.timed_out:
+            return False
         stop_round = player.participant.vars.get('stop_round')
         if stop_round is not None and player.round_number > stop_round:
             return False
@@ -453,11 +517,11 @@ class Puzzle(Page):
 class InstructionsPart2(Page):
     @staticmethod
     def is_displayed(player: Player):
-        return player.round_number == C.NUM_ROUNDS
+        return player.round_number == C.NUM_ROUNDS and not player.participant.timed_out
 
     @staticmethod
     def vars_for_template(player: Player):
-        prize = player.session.config.get('prize')
+        prize = player.prize
         return dict(
             prize_formatted=f"{prize:.2f}",
         )
@@ -468,11 +532,11 @@ class InstructionsPart2Rules(Page):
 
     @staticmethod
     def is_displayed(player: Player):
-        return player.round_number == C.NUM_ROUNDS
+        return player.round_number == C.NUM_ROUNDS and not player.participant.timed_out
 
     @staticmethod
     def vars_for_template(player: Player):
-        prize = player.session.config.get('prize')
+        prize = player.prize
         return dict(
             prize_formatted=f"{prize:.2f}",
         )
@@ -482,7 +546,7 @@ class InstructionsPart2Probability(Page):
 
     @staticmethod
     def is_displayed(player: Player):
-        return player.round_number == C.NUM_ROUNDS
+        return player.round_number == C.NUM_ROUNDS and not player.participant.timed_out
 
 
 class InstructionsPart2Examples(Page):
@@ -490,7 +554,7 @@ class InstructionsPart2Examples(Page):
 
     @staticmethod
     def is_displayed(player: Player):
-        return player.round_number == C.NUM_ROUNDS
+        return player.round_number == C.NUM_ROUNDS and not player.participant.timed_out
 
 
 
@@ -500,7 +564,7 @@ class Comprehension(Page):
 
     @staticmethod
     def is_displayed(player: Player):
-        return player.round_number == C.NUM_ROUNDS
+        return player.round_number == C.NUM_ROUNDS and not player.participant.timed_out
 
     @staticmethod
     def error_message(player: Player, values):
@@ -532,13 +596,31 @@ class Comprehension(Page):
 
 
 class WaitForScoring(WaitPage):
+    group_by_arrival_time = True
 
     @staticmethod
     def is_displayed(player: Player):
-        return player.round_number == C.NUM_ROUNDS
+        return player.round_number == C.NUM_ROUNDS and not player.participant.timed_out
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(
+            timeout_ms=WAIT_PAGE_TIMEOUT * 1000,
+            participant_code=player.participant.code,
+        )
+
+    @staticmethod
+    def live_method(player, data):
+        if data.get('type') == 'timeout':
+            player.participant.timed_out = True
+            player.participant._index_in_pages += 1
+            return {player.id_in_group: {'type': 'redirect', 'url': f'/p/{player.participant.code}/'}}
 
     @staticmethod
     def after_all_players_arrive(group: Group):
+        if any(p.participant.timed_out for p in group.get_players()):
+            return
+
         # 1) compute totals once, after both players finished all rounds
         for p in group.get_players():
             total = 0
@@ -576,33 +658,39 @@ class WaitForScoring(WaitPage):
             group.paying_winner = group.part2_winner
 
 
+class WaitTimeout(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return bool(player.participant.timed_out)
+
+
 # ARCHIVED / UNUSED (Belief(PageO)))
 # This old page refers to p_intervene and should not be used with the current mechanism.
 
-class Belief(Page):
-    form_model = 'player'
-    form_fields = ['belief_no_intervention']
+# class Belief(Page):
+#     form_model = 'player'
+#     form_fields = ['belief_no_intervention']
 
-    @staticmethod
-    def is_displayed(player: Player):
-        return player.round_number == C.NUM_ROUNDS
+#     @staticmethod
+#     def is_displayed(player: Player):
+#         return player.round_number == C.NUM_ROUNDS and not player.participant.timed_out
 
-    @staticmethod
-    def before_next_page(player: Player, timeout_happened):
-        # benchmark probability in percent
-        p_intervene = player.session.config['p_intervene']
-        true_no_intervention = int(round((1 - p_intervene) * 100))
-        player.true_no_intervention = true_no_intervention
+#     @staticmethod
+#     def before_next_page(player: Player, timeout_happened):
+#         # benchmark probability in percent
+#         p_intervene = player.session.config['p_intervene']
+#         true_no_intervention = int(round((1 - p_intervene) * 100))
+#         player.true_no_intervention = true_no_intervention
 
-        report = player.field_maybe_none('belief_no_intervention')
+#         report = player.field_maybe_none('belief_no_intervention')
 
-        if report is None:
-            player.belief_bonus_earned = False
-        else:
-            player.belief_bonus_earned = (abs(report - true_no_intervention) <= 5)
+#         if report is None:
+#             player.belief_bonus_earned = False
+#         else:
+#             player.belief_bonus_earned = (abs(report - true_no_intervention) <= 5)
 
-        bonus = player.session.config.get('belief_bonus', 0)
-        player.belief_bonus_amount = bonus if player.belief_bonus_earned else 0
+#         bonus = player.session.config.get('belief_bonus', 0)
+#         player.belief_bonus_amount = bonus if player.belief_bonus_earned else 0
 
 
 
@@ -612,7 +700,7 @@ class DummyOutcome(Page):
 
     @staticmethod
     def is_displayed(player: Player):
-        return player.round_number == C.NUM_ROUNDS
+        return player.round_number == C.NUM_ROUNDS and not player.participant.timed_out
 
     @staticmethod
     def vars_for_template(player: Player):
@@ -621,7 +709,7 @@ class DummyOutcome(Page):
 
         task_word = (
             "puzzles"
-            if player.session.config.get('framing') == 'iq'
+            if player.framing == 'iq'
             else "questions"
         )
             
@@ -651,7 +739,7 @@ class DummyOutcome(Page):
 class Part2StartScreen(Page):
     @staticmethod
     def is_displayed(player: Player):
-        return player.round_number == C.NUM_ROUNDS
+        return player.round_number == C.NUM_ROUNDS and not player.participant.timed_out
 
 
 class WebcamCheck(Page):
@@ -660,7 +748,7 @@ class WebcamCheck(Page):
 
     @staticmethod
     def is_displayed(player: Player):
-        return player.round_number == C.NUM_ROUNDS
+        return player.round_number == C.NUM_ROUNDS and not player.participant.timed_out
 
     @staticmethod
     def before_next_page(player, timeout_happened):
@@ -673,16 +761,18 @@ class FinalGuess(Page):
 
     @staticmethod
     def is_displayed(player: Player):
-        return player.round_number == C.NUM_ROUNDS
+        return player.round_number == C.NUM_ROUNDS and not player.participant.timed_out
 
 
 class End(Page):
     @staticmethod
     def is_displayed(player: Player):
-        return player.round_number == C.NUM_ROUNDS
+        return player.round_number == C.NUM_ROUNDS and not player.participant.timed_out
 
 
 page_sequence = [
+    WaitForScoring,
+    WaitTimeout,
     Consent,
     ConsentDeclined,
     AIWarning,
@@ -697,7 +787,6 @@ page_sequence = [
     InstructionsPart2Examples,
     Comprehension,
     Part2StartScreen,
-    WaitForScoring,
     DummyOutcome,
     FinalGuess,
     # WebcamCheck,

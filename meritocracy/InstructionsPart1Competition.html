@@ -2,7 +2,7 @@
 
 {{ block content }}
 
-{{ if session.config.framing == 'iq' }}
+{{ if player.framing == 'iq' }}
 <p>
 In this task, you can work on as many puzzles as you like — the total number of puzzles <strong>exceeds</strong> what most participants can complete.
 </p>
@@ -17,7 +17,7 @@ To determine your bonus earnings in this part, you will be <strong>paired with a
 Your bonus depends on how your performance compares to theirs.
 </p>
 
-{{ if session.config.framing == 'iq' }}
+{{ if player.framing == 'iq' }}
 <ul>
   <li>
     If you <strong>correctly solve a larger number of puzzles</strong> than your paired participant,

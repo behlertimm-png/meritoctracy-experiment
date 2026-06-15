@@ -6,8 +6,9 @@ SESSION_CONFIGS = [
         display_name="Meritocracy (LOW prize, IQ framing)",
         app_sequence=['meritocracy'],
         num_demo_participants=2,
-        prize=2,
-        framing='iq',
+        treatment='low_iq', # Set parameters according to treatment in create_session
+        # prize=2,
+        # framing='iq',
         belief_bonus=2.00,
         participation_fee=2.00,
     ),
@@ -16,8 +17,9 @@ SESSION_CONFIGS = [
         display_name="Meritocracy (LOW prize, questionnaire framing)",
         app_sequence=['meritocracy'],
         num_demo_participants=2,
-        prize=2,
-        framing='questionnaire',
+        treatment='low_quest',
+        # prize=2,
+        # framing='questionnaire',
         belief_bonus=2.00,
         participation_fee=2.00,
     ),
@@ -26,8 +28,9 @@ SESSION_CONFIGS = [
         display_name="Meritocracy (HIGH prize, IQ framing)",
         app_sequence=['meritocracy'],
         num_demo_participants=2,
-        prize=12,
-        framing='iq',
+        treatment='high_iq',
+        # prize=12,
+        # framing='iq',
         belief_bonus=2.00,
         participation_fee=2.00,
     ),
@@ -36,8 +39,17 @@ SESSION_CONFIGS = [
         display_name="Meritocracy (HIGH prize, questionnaire framing)",
         app_sequence=['meritocracy'],
         num_demo_participants=2,
-        prize=12,
-        framing='questionnaire',
+        treatment='high_quest',
+        # prize=12,
+        # framing='questionnaire',
+        belief_bonus=2.00,
+        participation_fee=2.00,
+    ),
+    dict(
+        name='meritocracy_random',
+        display_name="Meritocracy RANDOM TREATMENT",
+        app_sequence=['meritocracy'],
+        num_demo_participants=4,
         belief_bonus=2.00,
         participation_fee=2.00,
     ),
@@ -52,7 +64,7 @@ SESSION_CONFIG_DEFAULTS = dict(
     real_world_currency_per_point=1.00, participation_fee=0.00, doc=""
 )
 
-PARTICIPANT_FIELDS = []
+PARTICIPANT_FIELDS = ['timed_out']
 SESSION_FIELDS = []
 
 # ISO-639 code

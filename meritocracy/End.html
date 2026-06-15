@@ -28,7 +28,7 @@
     Competition bonus:
     <strong>
       {{ if player.id_in_group == group.paying_winner }}
-        {{ session.config.prize }}
+        {{ player.prize }}
       {{ else }}
         {{ 0 }}
       {{ endif }}
@@ -102,6 +102,6 @@
   <li>Your final oTree payoff: <strong>{{ player.payoff }}</strong></li>
 </ul>
 
-<p>You can now close this window.</p>
+<p>Please click here to return to Prolific: ADD LINK</p>
 
 {{ endblock }}

@@ -1,0 +1,23 @@
+{{ block title }}Waiting{{ endblock }}
+
+{{ block content }}
+
+<p>Please wait for the other participant.</p>
+
+{{ endblock }}
+
+{{ block scripts }}
+<script>
+const TIMEOUT_MS = {{ timeout_ms }};
+
+setTimeout(function () {
+    liveSend({ type: 'timeout' });
+}, TIMEOUT_MS);
+
+function liveRecv(data) {
+    if (data.type === 'redirect') {
+        window.location.href = data.url;
+    }
+}
+</script>
+{{ endblock }}
