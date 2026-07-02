@@ -1,6 +1,10 @@
 from otree.api import *
 import random
 import itertools
+import time
+import csv
+import functools
+from pathlib import Path
 
 
 doc = """
@@ -14,8 +18,8 @@ class C(BaseConstants):
     NAME_IN_URL = 'meritocracy'
     PLAYERS_PER_GROUP = 2
 
-    # 36 puzzles = 36 rounds
-    NUM_ROUNDS = 36
+    # 36 puzzle rounds (Part 1) + 1 final round (matching/Part 2, no puzzle)
+    NUM_ROUNDS = 37
 
     # One image per round (round 1 uses index 0, etc.)
     # Filenames match your actual files exactly: IQ_1.JPG ... IQ_36.JPG
@@ -147,6 +151,9 @@ def creating_session(subsession):
 
 
 def group_by_arrival_time_method(_subsession, waiting_players):
+    for p in waiting_players:
+        p.participant.vars.setdefault('meritocracy_wait_started_at', time.time())
+
     low_iq = [p for p in waiting_players if p.treatment == 'low_iq']
     low_quest = [p for p in waiting_players if p.treatment == 'low_quest']
     high_iq = [p for p in waiting_players if p.treatment == 'high_iq']
@@ -155,37 +162,27 @@ def group_by_arrival_time_method(_subsession, waiting_players):
     for group in [low_iq, low_quest, high_iq, high_quest]:
         if len(group) >= 2:
             return group[:2]
+
+    # No same-treatment partner available yet. If someone has been waiting
+    # too long, place them alone in a singleton group so they can be
+    # fallback-matched against a donor from the pilot study instead of
+    # waiting indefinitely (see finalize_singleton_outcome).
+    now = time.time()
+    timed_out = [
+        p for p in waiting_players
+        if now - p.participant.vars['meritocracy_wait_started_at'] >= WAIT_PAGE_TIMEOUT
+    ]
+    if timed_out:
+        timed_out.sort(key=lambda p: p.participant.vars['meritocracy_wait_started_at'])
+        return [timed_out[0]]
+
     return None
 
 
 class Group(BaseGroup):
-    part1_winner = models.IntegerField()
-    part2_winner = models.IntegerField()
-    
     # Old fields from old part 2 mechanism, kept for now so old code/data references don't break
     selected_player = models.IntegerField()
     intervene = models.BooleanField()
-
-    # New Part 2 mechanism
-    p_performance = models.IntegerField()
-    performance_rule_applies = models.BooleanField()
-    random_winner = models.IntegerField()
-
-    # To determine the payoff relevant part
-    paying_part = models.IntegerField()
-    paying_winner = models.IntegerField()
-
-    def set_part1_winner(self):
-        players = self.get_players()
-        p1 = players[0]
-        p2 = players[1]
-
-        if p1.total_correct > p2.total_correct:
-            self.part1_winner = p1.id_in_group
-        elif p2.total_correct > p1.total_correct:
-            self.part1_winner = p2.id_in_group
-        else:
-            self.part1_winner = random.choice([1, 2])
 
 
 class Player(BasePlayer):
@@ -203,6 +200,8 @@ class Player(BasePlayer):
     widget=widgets.RadioSelect,
     label="",
     )
+
+    prolific_id = models.StringField()
 
 
     # --- Part 1 (puzzles) ---
@@ -224,8 +223,26 @@ class Player(BasePlayer):
 
     is_correct = models.BooleanField(initial=False)
     total_correct = models.IntegerField(initial=0)
+    other_player_total_correct = models.IntegerField(initial=0)
     stop_part1 = models.BooleanField(initial=False)
     action = models.StringField(blank=True)
+
+    # --- Part 2 outcome mechanism (moved from Group to Player) ---
+    # For a real 2-player match, both players' rows are set to mirrored/
+    # coordinated values inside finalize_pair_outcome() so the pair shares
+    # exactly one Part 1 winner and one set of Part 2 random draws (never two
+    # winners, never zero). For a fallback (donor) match, the lone live
+    # player's row is set independently inside finalize_singleton_outcome().
+    is_fallback_match = models.BooleanField(initial=False)
+    fallback_donor_id = models.StringField(blank=True)
+
+    part1_winner = models.BooleanField(initial=False)
+    p_performance = models.IntegerField(initial=0)
+    performance_rule_applies = models.BooleanField(initial=False)
+    random_winner = models.BooleanField(initial=False)
+    part2_winner = models.BooleanField(initial=False)
+    paying_part = models.IntegerField(initial=0)
+    paying_winner = models.BooleanField(initial=False)
 
 
         
@@ -332,13 +349,134 @@ class Player(BasePlayer):
 def set_payoffs(player: Player):
     prize = player.prize
 
-    won_competition = player.id_in_group == player.group.paying_winner
+    won_competition = player.paying_winner
 
     competition_payoff = prize if won_competition else 0
 
     player.payoff = (
     competition_payoff
     + player.belief_bonus_amount
+    )
+
+
+DONOR_POOL_CSV_PATH = Path(__file__).resolve().parent.parent / '_static' / 'meritocracy' / 'donor_pool.csv'
+
+
+@functools.lru_cache(maxsize=1)
+def _load_donor_pool():
+    """Read donor_pool.csv once per server process, grouped by treatment.
+    Data contract: every treatment used in SESSION_CONFIGS must have >=2 rows
+    here (donors are drawn with replacement)."""
+    pool = {}
+    with DONOR_POOL_CSV_PATH.open(newline='', encoding='utf-8') as f:
+        for row in csv.DictReader(f):
+            pool.setdefault(row['treatment'].strip(), []).append(
+                dict(
+                    donor_id=row['donor_id'].strip(),
+                    total_correct=int(row['total_correct'].strip()),
+                )
+            )
+    return pool
+
+
+def draw_donor(treatment):
+    """Randomly draw (with replacement) one donor row for `treatment`.
+    Returns dict(donor_id=..., total_correct=...), or None if no donor rows
+    exist for this treatment (should not happen; see data contract above)."""
+    candidates = _load_donor_pool().get(treatment, [])
+    if not candidates:
+        return None
+    return random.choice(candidates)
+
+
+def _compute_total_correct(player):
+    total = 0
+    for pr in player.in_all_rounds():
+        if pr.field_maybe_none('is_correct'):
+            total += 1
+    player.total_correct = total
+
+
+def finalize_pair_outcome(p1: Player, p2: Player):
+    """Two real live players, paired normally (group_by_arrival_time_method
+    matched them by treatment). All Part 2 randomization is drawn ONCE and
+    mirrored/complemented onto both rows, so the pair always shares exactly
+    one designated Part 1/2 winner and one paying_part -- never two winners,
+    never zero, since each draw below calls random.*() exactly once."""
+    _compute_total_correct(p1)
+    _compute_total_correct(p2)
+
+    p1.other_player_total_correct = p2.total_correct
+    p2.other_player_total_correct = p1.total_correct
+
+    # Part 1 winner (ties broken by a single shared coin flip)
+    if p1.total_correct > p2.total_correct:
+        p1.part1_winner, p2.part1_winner = True, False
+    elif p2.total_correct > p1.total_correct:
+        p1.part1_winner, p2.part1_winner = False, True
+    else:
+        p1_wins = random.choice([True, False])
+        p1.part1_winner, p2.part1_winner = p1_wins, not p1_wins
+
+    # Part 2 mechanism: each draw happens once, then is copied/complemented
+    shared_p_performance = random.choice(list(range(0, 101, 10)))
+    shared_applies = random.random() < shared_p_performance / 100
+    p1_random_wins = random.choice([True, False])
+
+    for p in (p1, p2):
+        p.p_performance = shared_p_performance
+        p.performance_rule_applies = shared_applies
+    p1.random_winner, p2.random_winner = p1_random_wins, not p1_random_wins
+
+    for p in (p1, p2):
+        p.part2_winner = p.part1_winner if p.performance_rule_applies else p.random_winner
+
+    # Paying part: one shared draw, mirrored on both rows
+    shared_paying_part = random.choice([1, 2])
+    for p in (p1, p2):
+        p.paying_part = shared_paying_part
+        p.paying_winner = p.part1_winner if p.paying_part == 1 else p.part2_winner
+
+
+def finalize_singleton_outcome(player: Player):
+    """Fallback match: this live player waited too long for a same-treatment
+    partner, so we compare them one-directionally against a randomly drawn
+    (with replacement) donor score from the same-treatment pilot CSV. Only
+    this player's own outcome is computed/stored here -- the donor's own
+    (historical) outcome was already finalized in the pilot run and is
+    untouched."""
+    _compute_total_correct(player)
+    player.is_fallback_match = True
+
+    donor = draw_donor(player.treatment)
+    if donor is None:
+        # Defensive-only fallback. The CSV data contract (>=2 rows per
+        # treatment in use) guarantees this doesn't happen in practice; if it
+        # ever does, degrade to the existing dead-end/apology flow rather
+        # than fabricate an outcome from no data.
+        player.participant.timed_out = True
+        return
+
+    player.other_player_total_correct = donor['total_correct']
+    player.fallback_donor_id = donor['donor_id']
+
+    if player.total_correct > player.other_player_total_correct:
+        player.part1_winner = True
+    elif player.total_correct < player.other_player_total_correct:
+        player.part1_winner = False
+    else:
+        player.part1_winner = random.choice([True, False])
+
+    player.p_performance = random.choice(list(range(0, 101, 10)))
+    player.performance_rule_applies = random.random() < player.p_performance / 100
+    player.random_winner = random.choice([True, False])
+    player.part2_winner = (
+        player.part1_winner if player.performance_rule_applies else player.random_winner
+    )
+
+    player.paying_part = random.choice([1, 2])
+    player.paying_winner = (
+        player.part1_winner if player.paying_part == 1 else player.part2_winner
     )
 
 
@@ -367,6 +505,15 @@ class Consent(Page):
             max_bonus=f"{prize + belief_bonus:.2f}",
         )
 
+
+
+class ProlificID(Page):
+    form_model = 'player'
+    form_fields = ['prolific_id']
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
 
 
 class ConsentDeclined(Page):
@@ -481,6 +628,8 @@ class Puzzle(Page):
     @staticmethod
     def is_displayed(player: Player):
         if player.participant.timed_out:
+            return False
+        if player.round_number >= C.NUM_ROUNDS:
             return False
         stop_round = player.participant.vars.get('stop_round')
         if stop_round is not None and player.round_number > stop_round:
@@ -616,52 +765,12 @@ class WaitForScoring(WaitPage):
         )
 
     @staticmethod
-    def live_method(player, data):
-        if data.get('type') == 'timeout':
-            player.participant.timed_out = True
-            player.participant._index_in_pages += 1
-            return {player.id_in_group: {'type': 'redirect', 'url': f'/p/{player.participant.code}/'}}
-
-    @staticmethod
     def after_all_players_arrive(group: Group):
-        if any(p.participant.timed_out for p in group.get_players()):
-            return
-
-        # 1) compute totals once, after both players finished all rounds
-        for p in group.get_players():
-            total = 0
-            for pr in p.in_all_rounds():
-                if pr.field_maybe_none('is_correct'):
-                    total += 1
-            p.total_correct = total
-
-        # 2) determine Part 1 winner (tie-break handled inside set_part1_winner)
-        group.set_part1_winner()
-
-        # 3) Part 2 mechanism (NEW)
-
-        # Step 1: draw p_performance from {0,10,...,100}
-        group.p_performance = random.choice(list(range(0, 101, 10)))
-
-        # Step 2: draw whether Performance rule applies
-        group.performance_rule_applies = (random.random() < group.p_performance / 100)
-
-        # Step 3: draw random winner (for Random rule)
-        group.random_winner = random.choice([1, 2])
-
-        # Step 4: determine final winner
-        if group.performance_rule_applies:
-            group.part2_winner = group.part1_winner
+        players = group.get_players()
+        if len(players) == 2:
+            finalize_pair_outcome(players[0], players[1])
         else:
-            group.part2_winner = group.random_winner
-
-        # 4) FINAL STEP: randomly select which part is payoff-relevant
-        group.paying_part = random.choice([1, 2])
-
-        if group.paying_part == 1:
-            group.paying_winner = group.part1_winner
-        else:
-            group.paying_winner = group.part2_winner
+            finalize_singleton_outcome(players[0])
 
 
 class WaitTimeout(Page):
@@ -716,7 +825,7 @@ class DummyOutcome(Page):
 
     @staticmethod
     def vars_for_template(player: Player):
-        won = (player.id_in_group == player.group.part2_winner)
+        won = player.part2_winner
         belief_bonus = player.session.config.get('belief_bonus')
 
         task_word = (
@@ -734,7 +843,7 @@ class DummyOutcome(Page):
     @staticmethod
     def before_next_page(player: Player, timeout_happened):
         # Store the true randomly drawn probability that the Performance rule applies
-        player.true_p_performance = player.group.p_performance
+        player.true_p_performance = player.p_performance
 
         # Participant's guess
         report = player.field_maybe_none('belief_p_performance')
@@ -809,6 +918,7 @@ page_sequence = [
     WaitForScoring,
     WaitTimeout,
     Consent,
+    ProlificID,
     ConsentDeclined,
     AIWarning,
     AICheck,

@@ -1,0 +1,20 @@
+{{ block title }}{{ endblock }}
+
+{{ block content }}
+
+<p>
+Please enter your Prolific ID.
+</p>
+
+{{ formfield_errors 'prolific_id' }}
+
+<div style="margin-bottom: 20px;">
+    <input type="text"
+           name="prolific_id"
+           class="form-control"
+           autocomplete="off">
+</div>
+
+{{ next_button }}
+
+{{ endblock }}

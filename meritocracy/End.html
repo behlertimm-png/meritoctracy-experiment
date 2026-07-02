@@ -11,7 +11,7 @@
   <li>
     Part 2 outcome:
     <strong>
-      {{ if player.id_in_group == group.part2_winner }}
+      {{ if player.part2_winner }}
         Won
       {{ else }}
         Lost
@@ -21,13 +21,13 @@
 
   <li>
     Payoff-relevant part:
-    <strong>Part {{ group.paying_part }}</strong>
+    <strong>Part {{ player.paying_part }}</strong>
   </li>
 
   <li>
     Competition bonus:
     <strong>
-      {{ if player.id_in_group == group.paying_winner }}
+      {{ if player.paying_winner }}
         {{ player.prize }}
       {{ else }}
         {{ 0 }}
@@ -72,15 +72,20 @@
 <ul>
   <li>Your id in group: <strong>{{ player.id_in_group }}</strong></li>
   <li>Your total correct: <strong>{{ player.total_correct }}</strong></li>
+  <li>Other player's total correct: <strong>{{ player.other_player_total_correct }}</strong></li>
+  <li>Matched via fallback (donor): <strong>{{ player.is_fallback_match }}</strong></li>
+  {{ if player.is_fallback_match }}
+  <li>Donor id used: <strong>{{ player.fallback_donor_id }}</strong></li>
+  {{ endif }}
 
-  <li>Part 1 winner: <strong>{{ group.part1_winner }}</strong></li>
+  <li>Part 1 winner: <strong>{{ player.part1_winner }}</strong></li>
 
-  <li>Drawn p_performance: <strong>{{ group.p_performance }}%</strong></li>
+  <li>Drawn p_performance: <strong>{{ player.p_performance }}%</strong></li>
 
   <li>
     Performance rule applied in Part 2:
     <strong>
-      {{ if group.performance_rule_applies }}
+      {{ if player.performance_rule_applies }}
         Yes
       {{ else }}
         No
@@ -88,11 +93,11 @@
     </strong>
   </li>
 
-  <li>Random winner for Part 2: <strong>{{ group.random_winner }}</strong></li>
-  <li>Part 2 winner: <strong>{{ group.part2_winner }}</strong></li>
+  <li>Random winner for Part 2: <strong>{{ player.random_winner }}</strong></li>
+  <li>Part 2 winner: <strong>{{ player.part2_winner }}</strong></li>
 
-  <li>Paying part: <strong>Part {{ group.paying_part }}</strong></li>
-  <li>Paying winner: <strong>{{ group.paying_winner }}</strong></li>
+  <li>Paying part: <strong>Part {{ player.paying_part }}</strong></li>
+  <li>Paying winner: <strong>{{ player.paying_winner }}</strong></li>
 
   <li>Your belief guess: <strong>{{ player.belief_p_performance }}%</strong></li>
   <li>True p_performance stored for you: <strong>{{ player.true_p_performance }}%</strong></li>

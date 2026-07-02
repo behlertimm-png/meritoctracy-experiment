@@ -8,16 +8,14 @@
 
 {{ block scripts }}
 <script>
+// Precise backup reload: fires exactly at the wait-page timeout threshold so
+// this participant's own next request re-evaluates group_by_arrival_time_method
+// right away, rather than waiting for oTree's native randomized 10-70s
+// auto-reload (see otree/templates/otree/WaitPage.html) to eventually catch up.
 const TIMEOUT_MS = {{ timeout_ms }};
 
 setTimeout(function () {
-    liveSend({ type: 'timeout' });
+    window.location.href = window.location.pathname + '?reload=1';
 }, TIMEOUT_MS);
-
-function liveRecv(data) {
-    if (data.type === 'redirect') {
-        window.location.href = data.url;
-    }
-}
 </script>
 {{ endblock }}

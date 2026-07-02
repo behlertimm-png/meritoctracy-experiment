@@ -67,6 +67,11 @@ SESSION_CONFIG_DEFAULTS = dict(
 PARTICIPANT_FIELDS = ['timed_out']
 SESSION_FIELDS = []
 
+# On group_by_arrival_time wait pages, oTree prompts participants with
+# "Are you still there?" after this many seconds of inactivity (default: 120).
+# Set high enough that it should never actually trigger.
+GBAT_INACTIVE_SECONDS_UNTIL_PROMPT = 10 * 60
+
 # ISO-639 code
 # for example: de, fr, ja, ko, zh-hans
 LANGUAGE_CODE = 'en'
