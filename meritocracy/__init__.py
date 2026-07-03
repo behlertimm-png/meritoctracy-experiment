@@ -303,6 +303,26 @@ class Player(BasePlayer):
     comp_correct = models.IntegerField(initial=0)
     comp_bonus_amount = models.CurrencyField(initial=0)
 
+
+    comp_attempts = models.IntegerField(initial=0)
+    comp_first_try_recorded = models.BooleanField(initial=False)
+
+    cq1_first_try_correct = models.BooleanField(initial=False)
+    cq2_first_try_correct = models.BooleanField(initial=False)
+    cq3_first_try_correct = models.BooleanField(initial=False)
+    cq5_first_try_correct = models.BooleanField(initial=False)
+
+
+
+    cq1_first_answer = models.IntegerField(blank=True)
+    cq2_first_answer = models.IntegerField(blank=True)
+    cq3_first_answer = models.IntegerField(blank=True)
+    cq5_first_answer = models.IntegerField(blank=True)  
+
+
+
+
+
     # --- Beliefs ---
     belief_p_performance = models.IntegerField(
         choices=[
@@ -354,8 +374,9 @@ def set_payoffs(player: Player):
     competition_payoff = prize if won_competition else 0
 
     player.payoff = (
-    competition_payoff
-    + player.belief_bonus_amount
+        competition_payoff
+        + player.belief_bonus_amount
+        + player.comp_bonus_amount
     )
 
 
@@ -709,7 +730,10 @@ class InstructionsPart2Examples(Page):
 
 class Comprehension(Page):
     form_model = 'player'
-    form_fields = ['cq1', 'cq2', 'cq3', 'cq4', 'cq5']
+    form_fields = [
+        'cq1', 'cq2', 'cq3', 'cq5',
+        'cq1_first_answer', 'cq2_first_answer', 'cq3_first_answer', 'cq5_first_answer',
+    ]
 
     @staticmethod
     def is_displayed(player: Player):
@@ -735,20 +759,31 @@ class Comprehension(Page):
         if values['cq3'] != 3:
             errors['cq3'] = 'Incorrect. If the Performance rule applies with a 0% chance, the computer selects the winner at random, regardless of Part 1 performance.'
 
-        if values['cq4'] != 4:
-            errors['cq4'] = 'Incorrect. If the Performance rule applies with a 30% chance, then the Random rule applies with a 70% chance. Thus, the winner is selected at random in 70 out of 100 similar cases.'
-
         if values['cq5'] != 2:
             errors['cq5'] = f'Incorrect. If you solved fewer {task_word} than your paired participant in Part 1, you may still win in Part 2 if the Random rule applies and you are selected.'
+
         if errors:
             return errors
 
     @staticmethod
     def before_next_page(player: Player, timeout_happened):
-        player.comp_correct = 5
-        player.comp_bonus_amount = 0
+        correct_count = 0
 
+        player.cq1_first_try_correct = (player.cq1_first_answer == 1)
+        player.cq2_first_try_correct = (player.cq2_first_answer == 2)
+        player.cq3_first_try_correct = (player.cq3_first_answer == 3)
+        player.cq5_first_try_correct = (player.cq5_first_answer == 2)
 
+        correct_count += int(player.cq1_first_try_correct)
+        correct_count += int(player.cq2_first_try_correct)
+        correct_count += int(player.cq3_first_try_correct)
+        correct_count += int(player.cq5_first_try_correct)
+
+        player.comp_correct = correct_count
+        player.comp_bonus_amount = cu(correct_count * 0.25)
+        player.comp_first_try_recorded = True
+
+        
 
 class WaitForScoring(WaitPage):
     group_by_arrival_time = True
@@ -899,7 +934,7 @@ class WebcamCheck(Page):
         player.webcam_prompted = True
 
 
-class FinalGuess(Page):
+class ConfidenceCheck(Page):
     form_model = 'player'
     form_fields = ['final_guess_more_puzzles']
 
@@ -911,7 +946,14 @@ class FinalGuess(Page):
 class End(Page):
     @staticmethod
     def is_displayed(player: Player):
-        return player.round_number == C.NUM_ROUNDS and not player.participant.timed_out
+        return player.round_number == C.NUM_ROUNDS
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(
+            comp_correct=player.comp_correct,
+            comp_bonus_amount=player.comp_bonus_amount,
+        )
 
 
 page_sequence = [
@@ -926,6 +968,7 @@ page_sequence = [
     InstructionsPart1Competition,
     InstructionsPart1Timing,
     Puzzle,
+    ConfidenceCheck,
     InstructionsPart2,
     InstructionsPart2Rules,
     InstructionsPart2Probability,
@@ -934,7 +977,6 @@ page_sequence = [
     Part2StartScreen,
     OutcomeCalculation,
     DummyOutcome,
-    FinalGuess,
     # WebcamCheck,
     End,
 ]

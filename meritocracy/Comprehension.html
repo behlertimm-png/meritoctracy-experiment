@@ -65,18 +65,7 @@ If an answer is incorrect, you must revise it before continuing.
 </div>
 
 <div class="comp-question">
-  <p><strong>Q4. Suppose the chance that the Performance rule applies is 30%. Out of 100 similar cases, in how many cases is the winner selected at random, regardless of Part 1 performance?</strong></p>
-  <div class="comp-options">
-    <label><input type="radio" name="cq4" value="1" required> 30</label>
-    <label><input type="radio" name="cq4" value="2"> 100</label>
-    <label><input type="radio" name="cq4" value="3"> 50</label>
-    <label><input type="radio" name="cq4" value="4"> 70</label>
-  </div>
-  {{ formfield_errors 'cq4' }}
-</div>
-
-<div class="comp-question">
-  <p><strong>Q5. If you solved fewer {{ task_word }} than your paired participant in Part 1, is it guaranteed that you will lose Part 2?</strong></p>
+  <p><strong>Q4. If you solved fewer {{ task_word }} than your paired participant in Part 1, is it guaranteed that you will lose Part 2?</strong></p>
   <div class="comp-options">
     <label><input type="radio" name="cq5" value="1" required> Yes</label>
     <label><input type="radio" name="cq5" value="2"> No</label>
@@ -84,6 +73,62 @@ If an answer is incorrect, you must revise it before continuing.
   {{ formfield_errors 'cq5' }}
 </div>
 
+
+<input type="hidden" name="cq1_first_answer" id="cq1_first_answer">
+<input type="hidden" name="cq2_first_answer" id="cq2_first_answer">
+<input type="hidden" name="cq3_first_answer" id="cq3_first_answer">
+<input type="hidden" name="cq5_first_answer" id="cq5_first_answer">
+
+
 {{ next_button }}
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const fields = ['cq1', 'cq2', 'cq3', 'cq5'];
+  const storagePrefix = 'comprehension_';
+  const firstPrefix = 'comprehension_first_';
+
+  fields.forEach(function (field) {
+    const saved = sessionStorage.getItem(storagePrefix + field);
+
+    if (saved !== null) {
+      const input = document.querySelector(`input[name="${field}"][value="${saved}"]`);
+      if (input) {
+        input.checked = true;
+      }
+    }
+
+    document.querySelectorAll(`input[name="${field}"]`).forEach(function (input) {
+      input.addEventListener('change', function () {
+        sessionStorage.setItem(storagePrefix + field, input.value);
+      });
+    });
+  });
+
+  const form = document.querySelector('form');
+
+  if (form) {
+    form.addEventListener('submit', function () {
+      fields.forEach(function (field) {
+        let firstValue = sessionStorage.getItem(firstPrefix + field);
+
+        if (firstValue === null) {
+          const checked = document.querySelector(`input[name="${field}"]:checked`);
+          if (checked) {
+            firstValue = checked.value;
+            sessionStorage.setItem(firstPrefix + field, firstValue);
+          }
+        }
+
+        const hidden = document.getElementById(field + '_first_answer');
+        if (hidden && firstValue !== null) {
+          hidden.value = firstValue;
+        }
+      });
+    });
+  }
+});
+</script>
 
 {{ endblock }}
