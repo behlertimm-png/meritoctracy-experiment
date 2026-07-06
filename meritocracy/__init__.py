@@ -737,6 +737,32 @@ class InstructionsPart2Examples(Page):
 
 
 
+
+
+class InstructionsPart2Animation(Page):
+    allow_back_button = True
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == C.NUM_ROUNDS and not player.participant.timed_out
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        task_word = "puzzles" if player.framing == "iq" else "questions"
+        return dict(task_word=task_word)
+
+
+class InstructionsPart2ComprehensionIntro(Page):
+    allow_back_button = True
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == C.NUM_ROUNDS and not player.participant.timed_out
+
+
+
+
+
 class Comprehension(Page):
     allow_back_button = True
     form_model = 'player'
@@ -767,7 +793,7 @@ class Comprehension(Page):
             errors['cq2'] = f'Incorrect. If the Performance rule applies with a 100% chance, the participant who solved more {task_word} in Part 1 wins.'
 
         if values['cq3'] != 3:
-            errors['cq3'] = 'Incorrect. If the Performance rule applies with a 0% chance, the computer selects the winner at random, regardless of Part 1 performance.'
+            errors['cq3'] = 'Incorrect. If the Performance rule applies with a 0% chance, then the Random rule applies with a 100% chance. Hence, the computer selects the winner at random, regardless of Part 1 performance.'
 
         if values['cq5'] != 2:
             errors['cq5'] = f'Incorrect. If you solved fewer {task_word} than your paired participant in Part 1, you may still win in Part 2 if the Random rule applies and you are selected.'
@@ -983,6 +1009,8 @@ page_sequence = [
     InstructionsPart2Rules,
     InstructionsPart2Probability,
     InstructionsPart2Examples,
+    InstructionsPart2Animation,
+    InstructionsPart2ComprehensionIntro,
     Comprehension,
     Part2StartScreen,
     OutcomeCalculation,

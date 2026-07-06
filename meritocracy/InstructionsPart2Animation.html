@@ -1,0 +1,262 @@
+{{ block title }}{{ endblock }}
+
+{{ block content }}
+
+<p>
+Here is an animation for illustration purposes. Watch as a number is randomly selected. The number then determines the chance that the Performance rule (vs the Random rule) applies.
+</p>
+
+<p>
+Please recall: you will learn the drawn number and the applied rule only at the end of the study.
+</p>
+
+<style>
+#wrap {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+#wrap .th {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+#wrap .ts {
+  font-size: 13px;
+}
+</style>
+
+<div style="margin: 18px 0 10px 0;">
+  <button type="button" id="animationBtn" class="btn btn-primary">
+    Start animation
+  </button>
+  <span id="animationStatus" style="margin-left: 12px; opacity: 0.8;">
+    Click to start the animation.
+  </span>
+</div>
+
+<div id="wrap">
+<svg id="svg-main" width="100%" viewBox="0 0 680 260" role="img">
+  <title>Slot machine draw: 30% then 80%</title>
+  <desc>A slot machine does two fast laps then stops at 30%, reveals the bar, resets and stops at 80%.</desc>
+
+  <defs>
+    <clipPath id="bar-clip">
+      <rect x="40" y="155" width="614" height="40" rx="6"/>
+    </clipPath>
+    <marker id="arr-g" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <!-- Header -->
+  <text class="th" x="340" y="28" text-anchor="middle">A number is drawn at random</text>
+
+  <!-- Pills -->
+  <g id="pill-0"><rect x="40"  y="50" width="48" height="26" rx="13" fill="#D3D1C7" stroke="#B4B2A9" stroke-width="0.5"/><text class="ts" x="64"  y="63" text-anchor="middle" dominant-baseline="central" fill="#444441">0%</text></g>
+  <g id="pill-1"><rect x="96"  y="50" width="48" height="26" rx="13" fill="#D3D1C7" stroke="#B4B2A9" stroke-width="0.5"/><text class="ts" x="120" y="63" text-anchor="middle" dominant-baseline="central" fill="#444441">10%</text></g>
+  <g id="pill-2"><rect x="152" y="50" width="48" height="26" rx="13" fill="#D3D1C7" stroke="#B4B2A9" stroke-width="0.5"/><text class="ts" x="176" y="63" text-anchor="middle" dominant-baseline="central" fill="#444441">20%</text></g>
+  <g id="pill-3"><rect x="208" y="50" width="48" height="26" rx="13" fill="#D3D1C7" stroke="#B4B2A9" stroke-width="0.5"/><text class="ts" x="232" y="63" text-anchor="middle" dominant-baseline="central" fill="#444441">30%</text></g>
+  <g id="pill-4"><rect x="264" y="50" width="48" height="26" rx="13" fill="#D3D1C7" stroke="#B4B2A9" stroke-width="0.5"/><text class="ts" x="288" y="63" text-anchor="middle" dominant-baseline="central" fill="#444441">40%</text></g>
+  <g id="pill-5"><rect x="320" y="50" width="48" height="26" rx="13" fill="#D3D1C7" stroke="#B4B2A9" stroke-width="0.5"/><text class="ts" x="344" y="63" text-anchor="middle" dominant-baseline="central" fill="#444441">50%</text></g>
+  <g id="pill-6"><rect x="376" y="50" width="48" height="26" rx="13" fill="#D3D1C7" stroke="#B4B2A9" stroke-width="0.5"/><text class="ts" x="400" y="63" text-anchor="middle" dominant-baseline="central" fill="#444441">60%</text></g>
+  <g id="pill-7"><rect x="432" y="50" width="48" height="26" rx="13" fill="#D3D1C7" stroke="#B4B2A9" stroke-width="0.5"/><text class="ts" x="456" y="63" text-anchor="middle" dominant-baseline="central" fill="#444441">70%</text></g>
+  <g id="pill-8"><rect x="488" y="50" width="48" height="26" rx="13" fill="#D3D1C7" stroke="#B4B2A9" stroke-width="0.5"/><text class="ts" x="512" y="63" text-anchor="middle" dominant-baseline="central" fill="#444441">80%</text></g>
+  <g id="pill-9"><rect x="544" y="50" width="48" height="26" rx="13" fill="#D3D1C7" stroke="#B4B2A9" stroke-width="0.5"/><text class="ts" x="568" y="63" text-anchor="middle" dominant-baseline="central" fill="#444441">90%</text></g>
+  <g id="pill-10"><rect x="600" y="50" width="54" height="26" rx="13" fill="#D3D1C7" stroke="#B4B2A9" stroke-width="0.5"/><text class="ts" x="627" y="63" text-anchor="middle" dominant-baseline="central" fill="#444441">100%</text></g>
+
+  <!-- Arrow -->
+  <line id="draw-arrow" x1="232" y1="80" x2="232" y2="150" stroke="#1D9E75" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arr-g)" opacity="0"/>
+
+  <!-- Bar -->
+  <rect id="bar-bg"      x="40" y="155" width="614" height="40" rx="6" fill="#D3D1C7" opacity="0"/>
+  <rect id="bar-green"   x="40" y="155" width="0"   height="40" fill="#1D9E75" clip-path="url(#bar-clip)" opacity="0"/>
+  <rect id="bar-purple"  x="40" y="155" width="0"   height="40" fill="#7F77DD" clip-path="url(#bar-clip)" opacity="0"/>
+  <line id="bar-divider" x1="40" y1="155" x2="40" y2="195" stroke="white" stroke-width="1.5" opacity="0"/>
+  <rect id="bar-outline" x="40" y="155" width="614" height="40" rx="6" fill="none" stroke="var(--b)" stroke-width="0.5" opacity="0"/>
+  <text id="label-green"  class="ts" x="130" y="175" text-anchor="middle" dominant-baseline="central" fill="#E1F5EE"  font-weight="500" opacity="0"></text>
+  <text id="label-purple" class="ts" x="430" y="175" text-anchor="middle" dominant-baseline="central" fill="#EEEDFE" font-weight="500" opacity="0"></text>
+  <text id="anno1" class="ts" x="40" y="215" fill="var(--s)" opacity="0"></text>
+  <text id="anno2" class="ts" x="40" y="233" fill="var(--s)" opacity="0"></text>
+</svg>
+</div>
+
+<script>
+const pillCenters = [64,120,176,232,288,344,400,456,512,568,627];
+const BAR_X = 40, BAR_W = 614;   // right edge = 654 = right edge of the 100% pill
+let activePill = -1;
+let animationRunning = false;
+
+function resetPill(i) {
+  if (i < 0 || i > 10) return;
+  const g = document.getElementById('pill-' + i);
+  const r = g.querySelector('rect');
+  const t = g.querySelector('text');
+  r.setAttribute('fill', '#D3D1C7');
+  r.setAttribute('stroke', '#B4B2A9');
+  r.setAttribute('stroke-width', '0.5');
+  r.setAttribute('y', '50');
+  r.setAttribute('height', '26');
+  r.setAttribute('rx', '13');
+  t.setAttribute('fill', '#444441');
+  t.setAttribute('y', '63');
+}
+
+function highlightPill(i) {
+  if (activePill === i) return;
+  resetPill(activePill);
+  activePill = i;
+  const g = document.getElementById('pill-' + i);
+  const r = g.querySelector('rect');
+  const t = g.querySelector('text');
+  r.setAttribute('fill', '#1D9E75');
+  r.setAttribute('stroke', '#0F6E56');
+  r.setAttribute('stroke-width', '1');
+  r.setAttribute('y', '46');
+  r.setAttribute('height', '34');
+  r.setAttribute('rx', '17');
+  t.setAttribute('fill', '#E1F5EE');
+  t.setAttribute('y', '63');
+}
+
+function hideBar() {
+  ['bar-bg','bar-green','bar-purple','bar-divider','bar-outline',
+   'label-green','label-purple','anno1','anno2','draw-arrow'].forEach(id => {
+    document.getElementById(id).setAttribute('opacity','0');
+  });
+}
+
+function showBar(pct, pillIdx) {
+  const cx = pillCenters[pillIdx];
+  // Anchor the green/purple division to the SAME x as the arrow (the pill centre),
+  // so the arrow tip and the divider line up perfectly.
+  const divisionX = cx;
+  const greenW  = divisionX - BAR_X;
+  const purpleX = divisionX;
+  const purpleW = (BAR_X + BAR_W) - divisionX;
+
+  const arrow = document.getElementById('draw-arrow');
+  arrow.setAttribute('x1', cx);
+  arrow.setAttribute('x2', cx);
+  arrow.setAttribute('opacity', '1');
+
+  document.getElementById('bar-bg').setAttribute('opacity','1');
+  document.getElementById('bar-outline').setAttribute('opacity','1');
+
+  const bg = document.getElementById('bar-green');
+  bg.setAttribute('width', greenW);
+  bg.setAttribute('opacity','1');
+
+  const bp = document.getElementById('bar-purple');
+  bp.setAttribute('x', purpleX);
+  bp.setAttribute('width', purpleW);
+  bp.setAttribute('opacity','1');
+
+  const div = document.getElementById('bar-divider');
+  div.setAttribute('x1', purpleX);
+  div.setAttribute('x2', purpleX);
+  div.setAttribute('opacity', pct > 0 && pct < 100 ? '1' : '0');
+
+  const lg = document.getElementById('label-green');
+  const lp = document.getElementById('label-purple');
+  lg.setAttribute('x', BAR_X + greenW / 2);
+  lg.textContent = 'Performance rule — ' + pct + '%';
+  lg.setAttribute('opacity', greenW > 110 ? '1' : '0');
+  lp.setAttribute('x', purpleX + purpleW / 2);
+  lp.textContent = 'Random rule — ' + (100 - pct) + '%';
+  lp.setAttribute('opacity', purpleW > 80 ? '1' : '0');
+
+  const a1 = document.getElementById('anno1');
+  const a2 = document.getElementById('anno2');
+  a1.textContent = pct + ' out of 100 cases: winner = participant who solved more {{ task_word }}';
+  a2.textContent = (100 - pct) + ' out of 100 cases: winner = randomly selected participant';
+  a1.setAttribute('opacity','1');
+  a2.setAttribute('opacity','1');
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// Spin at constant speed for exactly `steps` pill-advances, ending on pill `targetIdx`.
+// We go left-to-right (0→10), always forward.
+// Two full laps = 22 steps. Then continue forward until we hit targetIdx.
+async function spinToTarget(targetIdx, stepMs) {
+  // Build the sequence: 2 full laps (0..10, 0..10) then continue to targetIdx
+  // After 2 laps we're conceptually at position 0 again (we just finished 100%).
+  // We continue forward: 0, 1, 2, ... targetIdx
+  const sequence = [];
+  // Lap 1
+  for (let i = 0; i <= 10; i++) sequence.push(i);
+  // Lap 2
+  for (let i = 0; i <= 10; i++) sequence.push(i);
+  // Final run: from 0 up to and including targetIdx
+  for (let i = 0; i <= targetIdx; i++) sequence.push(i);
+
+  for (let s = 0; s < sequence.length; s++) {
+    highlightPill(sequence[s]);
+    await delay(stepMs);
+  }
+}
+
+async function runSequence() {
+  if (animationRunning) return;
+
+  animationRunning = true;
+  const btn = document.getElementById('animationBtn');
+  const status = document.getElementById('animationStatus');
+
+  btn.disabled = true;
+  btn.textContent = 'Animation running...';
+  status.textContent = 'Please watch the two examples.';
+
+  hideBar();
+  resetPill(activePill);
+  activePill = -1;
+
+  await delay(800);
+
+  // --- DRAW 1: two laps, stop at 30% (index 3) ---
+  status.textContent = 'First example: the draw stops at 30%.';
+  await spinToTarget(3, 110);
+  await delay(700);
+  showBar(30, 3);
+
+  await delay(9000);   // hold the 30% example longer
+
+  // Reset
+  hideBar();
+  resetPill(activePill);
+  activePill = -1;
+  await delay(800);
+
+  // --- DRAW 2: two laps, stop at 80% (index 8) ---
+  status.textContent = 'Second example: the draw stops at 80%.';
+  await spinToTarget(8, 110);
+  await delay(700);
+  showBar(80, 8);
+
+  await delay(9500);   // hold the 80% example longer
+
+  animationRunning = false;
+  btn.disabled = false;
+  btn.textContent = 'Watch again';
+  status.textContent = 'The animation is finished. You may continue or watch it again.';
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  hideBar();
+  resetPill(activePill);
+  activePill = -1;
+
+  const btn = document.getElementById('animationBtn');
+  if (btn) {
+    btn.addEventListener('click', runSequence);
+  }
+});
+</script>
+
+
+<div style="margin-top: 24px; display: flex; gap: 12px; align-items: center;">
+  {{ back_button }}
+  {{ next_button }}
+</div>
+
+{{ endblock }}

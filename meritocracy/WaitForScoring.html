@@ -1,17 +1,21 @@
-{{ block title }}Waiting{{ endblock }}
+{{ block title }}{{ endblock }}
 
 {{ block content }}
 
-<p>Please wait while the outcome of Part 1 is determined.</p>
+<div style="text-align: center; margin-top: 80px;">
+  <p style="font-size: 1.25rem; line-height: 1.5;">
+    Please wait while the outcome of Part 1 is determined.
+  </p>
+
+  <p style="font-size: 1.05rem; line-height: 1.5; opacity: 0.8;">
+    This may take up to several minutes depending on server capacity.
+  </p>
+</div>
 
 {{ endblock }}
 
 {{ block scripts }}
 <script>
-// Precise backup reload: fires exactly at the wait-page timeout threshold so
-// this participant's own next request re-evaluates group_by_arrival_time_method
-// right away, rather than waiting for oTree's native randomized 10-70s
-// auto-reload (see otree/templates/otree/WaitPage.html) to eventually catch up.
 const TIMEOUT_MS = {{ timeout_ms }};
 
 setTimeout(function () {
