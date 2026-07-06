@@ -510,21 +510,30 @@ class Consent(Page):
         return player.round_number == 1
 
     @staticmethod
-    def before_next_page(player: Player, timeout_happened):
-        player.participant.vars['consent_declined'] = (player.consent == 'no')
-
-    @staticmethod
     def vars_for_template(player: Player):
-
         prize = player.prize
         belief_bonus = player.session.config.get('belief_bonus')
+        comprehension_bonus = 1.00
+
+        if prize == 2:
+            duration_text = "10 minutes"
+        else:
+            duration_text = "between 10–20 minutes"
 
         return dict(
             participation_fee=player.session.config.get('participation_fee'),
             prize=prize,
             belief_bonus=belief_bonus,
-            max_bonus=f"{prize + belief_bonus:.2f}",
+            comprehension_bonus=comprehension_bonus,
+            max_bonus=f"{prize + belief_bonus + comprehension_bonus:.2f}",
+            duration_text=duration_text,
         )
+
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        player.participant.vars['consent_declined'] = (player.consent == 'no')
+
+
 
 
 
@@ -729,6 +738,7 @@ class InstructionsPart2Examples(Page):
 
 
 class Comprehension(Page):
+    allow_back_button = True
     form_model = 'player'
     form_fields = [
         'cq1', 'cq2', 'cq3', 'cq5',
