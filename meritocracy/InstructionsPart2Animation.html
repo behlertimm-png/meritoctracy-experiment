@@ -3,11 +3,15 @@
 {{ block content }}
 
 <p>
-Here is an animation for illustration purposes. Watch as a number is randomly selected. The number then determines the chance that the Performance rule (vs the Random rule) applies.
+The animation below illustrates how the random draw determines whether the Performance rule or the Random rule applies.
 </p>
 
 <p>
 Please recall: you will learn the drawn number and the applied rule only at the end of the study.
+</p>
+
+<p>
+Please watch the two examples. In the first example, the randomly drawn number is <strong>30%</strong>. In the second example, the randomly drawn number is <strong>80%</strong>.
 </p>
 
 <style>
@@ -29,10 +33,11 @@ Please recall: you will learn the drawn number and the applied rule only at the 
   <button type="button" id="animationBtn" class="btn btn-primary">
     Start animation
   </button>
-  <span id="animationStatus" style="margin-left: 12px; opacity: 0.8;">
-    Click to start the animation.
-  </span>
 </div>
+
+<p id="animationFinished" style="display: none; margin-top: 12px;">
+  The animation is finished. You may continue or replay it.
+</p>
 
 <div id="wrap">
 <svg id="svg-main" width="100%" viewBox="0 0 680 260" role="img">
@@ -201,11 +206,14 @@ async function runSequence() {
 
   animationRunning = true;
   const btn = document.getElementById('animationBtn');
-  const status = document.getElementById('animationStatus');
+  const finished = document.getElementById('animationFinished');
+
+  if (finished) {
+    finished.style.display = 'none';
+  }
 
   btn.disabled = true;
   btn.textContent = 'Animation running...';
-  status.textContent = 'Please watch the two examples.';
 
   hideBar();
   resetPill(activePill);
@@ -214,7 +222,6 @@ async function runSequence() {
   await delay(800);
 
   // --- DRAW 1: two laps, stop at 30% (index 3) ---
-  status.textContent = 'First example: the draw stops at 30%.';
   await spinToTarget(3, 110);
   await delay(700);
   showBar(30, 3);
@@ -228,7 +235,6 @@ async function runSequence() {
   await delay(800);
 
   // --- DRAW 2: two laps, stop at 80% (index 8) ---
-  status.textContent = 'Second example: the draw stops at 80%.';
   await spinToTarget(8, 110);
   await delay(700);
   showBar(80, 8);
@@ -237,8 +243,11 @@ async function runSequence() {
 
   animationRunning = false;
   btn.disabled = false;
-  btn.textContent = 'Watch again';
-  status.textContent = 'The animation is finished. You may continue or watch it again.';
+  btn.textContent = 'Replay animation';
+
+  if (finished) {
+    finished.style.display = 'block';
+  }
 }
 
 document.addEventListener('DOMContentLoaded', function () {
