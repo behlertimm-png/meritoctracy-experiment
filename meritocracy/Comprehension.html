@@ -26,10 +26,12 @@
   }
 </style>
 
+
 <p>
 Please answer all questions correctly before proceeding. You will receive $0.25 for each question that you answer correctly on your first attempt.
 If an answer is incorrect, you must revise it before continuing.
 </p>
+
 
 <div class="comp-question">
   <p><strong>Q1. How does the Random rule determine the winner?</strong></p>
@@ -42,6 +44,7 @@ If an answer is incorrect, you must revise it before continuing.
   {{ formfield_errors 'cq1' }}
 </div>
 
+
 <div class="comp-question">
   <p><strong>Q2. If the Performance rule applies with a 100% chance, how is the winner determined?</strong></p>
   <div class="comp-options">
@@ -53,6 +56,7 @@ If an answer is incorrect, you must revise it before continuing.
   {{ formfield_errors 'cq2' }}
 </div>
 
+
 <div class="comp-question">
   <p><strong>Q3. If the chance that the Performance rule applies is 0%, how is the winner determined?</strong></p>
   <div class="comp-options">
@@ -63,6 +67,7 @@ If an answer is incorrect, you must revise it before continuing.
   </div>
   {{ formfield_errors 'cq3' }}
 </div>
+
 
 <div class="comp-question">
   <p><strong>Q4. If you solved fewer {{ task_word }} than your paired participant in Part 1, is it guaranteed that you will lose Part 2?</strong></p>
@@ -80,20 +85,122 @@ If an answer is incorrect, you must revise it before continuing.
 <input type="hidden" name="cq5_first_answer" id="cq5_first_answer">
 
 
-<div style="margin-top: 24px; display: flex; gap: 12px; align-items: center;">
-  {{ back_button }}
+<!-- Navigation buttons -->
+<div style="
+    margin-top: 24px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+">
+  <button
+    type="button"
+    class="btn btn-secondary"
+    onclick="openReviewPopup()"
+  >
+    Review Part 2 rules
+  </button>
+
   {{ next_button }}
 </div>
 
 
+<!-- Review popup -->
+<div id="reviewPopup"
+     style="
+       display: none;
+       position: fixed;
+       z-index: 1000;
+       left: 0;
+       top: 0;
+       width: 100%;
+       height: 100%;
+       background-color: rgba(0,0,0,0.45);
+       overflow: auto;
+     ">
+
+  <div style="
+       background-color: white;
+       max-width: 800px;
+       margin: 8% auto;
+       padding: 28px;
+       border-radius: 6px;
+       box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+       ">
+
+    <p>
+      In Part 2, one of <strong>two rules</strong> is applied to determine the winner:
+    </p>
+
+    <p><strong>Performance rule</strong></p>
+
+    {{ if player.framing == 'iq' }}
+    <p>
+      The participant who solved more <strong>puzzles in Part 1</strong> wins.
+      If both participants solved the same number of puzzles, each is equally likely to win.
+    </p>
+    {{ else }}
+    <p>
+      The participant who solved more <strong>questions in Part 1</strong> wins.
+      If both participants solved the same number of questions, each is equally likely to win.
+    </p>
+    {{ endif }}
+
+    <p><strong>Random rule</strong></p>
+
+    <p>
+      The computer selects one of the two participants at random,
+      giving each an equal chance of winning, regardless of their performance in Part 1.
+    </p>
+
+    <p><strong>Which rule applies?</strong></p>
+
+    <p>
+      A number is randomly drawn from
+      <strong>0%, 10%, 20%, 30%, 40%, 50%, 60%, 70%, 80%, 90%, or 100%</strong>.
+      Each number is equally likely.
+    </p>
+
+    <p>
+      The drawn number determines the chance that the <strong>Performance rule</strong> applies.
+      The <strong>Random rule</strong> applies with the remaining chance.
+      For example, if 40% is drawn, the Performance rule applies with a 40% chance
+      and the Random rule with a 60% chance.
+    </p>
+
+
+    <div style="margin-top: 24px;">
+      <button
+        type="button"
+        class="btn btn-primary"
+        onclick="closeReviewPopup()"
+      >
+        Close
+      </button>
+    </div>
+
+  </div>
+</div>
+
+
 <script>
+function openReviewPopup() {
+    document.getElementById('reviewPopup').style.display = 'block';
+}
+
+function closeReviewPopup() {
+    document.getElementById('reviewPopup').style.display = 'none';
+}
+
+
 document.addEventListener('DOMContentLoaded', function () {
   const fields = ['cq1', 'cq2', 'cq3', 'cq5'];
   const storagePrefix = 'comprehension_';
   const firstPrefix = 'comprehension_first_';
 
+
   fields.forEach(function (field) {
     const saved = sessionStorage.getItem(storagePrefix + field);
+
 
     if (saved !== null) {
       const input = document.querySelector(`input[name="${field}"][value="${saved}"]`);
@@ -102,6 +209,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }
 
+
     document.querySelectorAll(`input[name="${field}"]`).forEach(function (input) {
       input.addEventListener('change', function () {
         sessionStorage.setItem(storagePrefix + field, input.value);
@@ -109,12 +217,15 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+
   const form = document.querySelector('form');
+
 
   if (form) {
     form.addEventListener('submit', function () {
       fields.forEach(function (field) {
         let firstValue = sessionStorage.getItem(firstPrefix + field);
+
 
         if (firstValue === null) {
           const checked = document.querySelector(`input[name="${field}"]:checked`);
@@ -123,6 +234,7 @@ document.addEventListener('DOMContentLoaded', function () {
             sessionStorage.setItem(firstPrefix + field, firstValue);
           }
         }
+
 
         const hidden = document.getElementById(field + '_first_answer');
         if (hidden && firstValue !== null) {
@@ -133,5 +245,6 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 </script>
+
 
 {{ endblock }}

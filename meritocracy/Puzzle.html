@@ -1,6 +1,7 @@
 {% extends "global/Page.html" %}
 {% load otree %}
 
+
 {{ if player.framing == 'iq' }}
 {% block title %}
 Puzzle {{ round_number }}
@@ -11,7 +12,9 @@ Question {{ round_number }}
 {% endblock %}
 {{ endif }}
 
+
 {% block content %}
+
 
 <style>
   .otree-body .container {
@@ -89,7 +92,6 @@ Question {{ round_number }}
     margin-top: 25px;
   }
 
-  
   .actions button,
   .actions .next-wrapper {
     width: 100%;
@@ -124,26 +126,60 @@ Question {{ round_number }}
   }
 </style>
 
+
 <div class="puzzle-grid">
+
   <div class="puzzle-card">
-    <img class="puzzle-img" src="/static/{{ puzzle_image }}" alt="Puzzle image">
+    <img class="puzzle-img"
+         src="/static/{{ puzzle_image }}"
+         alt="Puzzle image">
   </div>
 
+
   <div class="answers-card">
+
     <div id="timer-slot"></div>
+
 
     <div style="margin-bottom: 8px;">
       <strong>Identify the missing image (1–8):</strong>
     </div>
 
+
     {{ formfield 'answer' }}
     {{ formfield_errors 'answer' }}
 
-    <input type="hidden" name="action" id="id_action" value="next">
+
+    <input type="hidden"
+           name="action"
+           id="id_action"
+           value="next">
+
+
+    <!-- Timing/process variables -->
+    <input type="hidden"
+           name="puzzle_first_answer_ms"
+           id="id_puzzle_first_answer_ms">
+
+    <input type="hidden"
+           name="puzzle_submit_ms"
+           id="id_puzzle_submit_ms">
+
+    <input type="hidden"
+           name="puzzle_answer_clicks"
+           id="id_puzzle_answer_clicks"
+           value="0">
+
+    <input type="hidden"
+           name="puzzle_interaction_log"
+           id="id_puzzle_interaction_log"
+           value="[]">
+
 
     <div class="actions">
 
       <div class="next-wrapper locked" id="nextWrapper">
+
         <button class="btn btn-primary"
                 id="nextPuzzleBtn"
                 type="submit"
@@ -155,32 +191,101 @@ Question {{ round_number }}
         <span class="next-tooltip-text">
           You can move to the next puzzle after 30 seconds.
         </span>
+
       </div>
 
-     <button class="btn btn-outline-danger stop-button"
-             type="submit"
-             onclick="document.getElementById('id_action').value='stop';">
-       Stop Part 1 and continue to Part 2
-     </button>
+
+      <button class="btn btn-outline-danger stop-button"
+              id="stopPart1Btn"
+              type="submit"
+              onclick="handleStopClick();">
+        Stop Part 1 and continue to Part 2
+      </button>
 
     </div>
+
   </div>
+
 </div>
 
+
 <script>
+
 let nextUnlocked = false;
+let answerClickCount = 0;
+let firstAnswerRecorded = false;
+let interactionLog = [];
+
+
+/*
+performance.now() gives milliseconds since the current page navigation began.
+Thus all recorded times below are relative to the appearance/loading
+of this puzzle page.
+*/
+function elapsedMs() {
+  return Math.round(performance.now());
+}
+
+
+function saveInteractionLog() {
+  document.getElementById('id_puzzle_interaction_log').value =
+    JSON.stringify(interactionLog);
+}
+
+
+function addEvent(eventData) {
+
+  eventData.t_ms = elapsedMs();
+
+  interactionLog.push(eventData);
+
+  saveInteractionLog();
+}
+
 
 function handleNextClick(event) {
+
   if (!nextUnlocked) {
+
     event.preventDefault();
+
+    addEvent({
+      type: 'next_locked_click'
+    });
+
     return false;
   }
 
   document.getElementById('id_action').value = 'next';
+
+  addEvent({
+    type: 'submit_click',
+    action: 'next'
+  });
+
   return true;
 }
 
+
+function handleStopClick() {
+
+  document.getElementById('id_action').value = 'stop';
+
+  addEvent({
+    type: 'submit_click',
+    action: 'stop'
+  });
+}
+
+
 document.addEventListener('DOMContentLoaded', function () {
+
+  /*
+  -------------------------
+  Move oTree timer
+  -------------------------
+  */
+
   const timer = document.querySelector('.otree-timer');
   const slot = document.getElementById('timer-slot');
 
@@ -189,11 +294,92 @@ document.addEventListener('DOMContentLoaded', function () {
     timer.style.visibility = 'visible';
   }
 
-  const nextBtn = document.getElementById('nextPuzzleBtn');
-  const nextWrapper = document.getElementById('nextWrapper');
+
+  /*
+  -------------------------
+  Record answer selections
+  -------------------------
+  */
+
+  const answerInputs =
+    document.querySelectorAll('input[name="answer"]');
+
+  answerInputs.forEach(function (input) {
+
+    input.addEventListener('change', function () {
+
+      const t = elapsedMs();
+
+      answerClickCount += 1;
+
+      document.getElementById(
+        'id_puzzle_answer_clicks'
+      ).value = answerClickCount;
+
+
+      if (!firstAnswerRecorded) {
+
+        document.getElementById(
+          'id_puzzle_first_answer_ms'
+        ).value = t;
+
+        firstAnswerRecorded = true;
+      }
+
+
+      interactionLog.push({
+        type: 'answer',
+        t_ms: t,
+        answer: input.value
+      });
+
+      saveInteractionLog();
+
+    });
+
+  });
+
+
+  /*
+  -------------------------
+  Record final submission
+  -------------------------
+  */
+
+  const form = document.querySelector('form');
+
+  if (form) {
+
+    form.addEventListener('submit', function () {
+
+      document.getElementById(
+        'id_puzzle_submit_ms'
+      ).value = elapsedMs();
+
+      saveInteractionLog();
+
+    });
+
+  }
+
+
+  /*
+  -------------------------
+  Unlock Next after 30 sec
+  -------------------------
+  */
+
+  const nextBtn =
+    document.getElementById('nextPuzzleBtn');
+
+  const nextWrapper =
+    document.getElementById('nextWrapper');
+
 
   if (nextBtn) {
+
     setTimeout(function () {
+
       nextUnlocked = true;
 
       nextBtn.style.opacity = '1';
@@ -202,9 +388,18 @@ document.addEventListener('DOMContentLoaded', function () {
       if (nextWrapper) {
         nextWrapper.classList.remove('locked');
       }
+
+      addEvent({
+        type: 'next_unlocked'
+      });
+
     }, 30000);
+
   }
+
 });
+
 </script>
+
 
 {% endblock %}

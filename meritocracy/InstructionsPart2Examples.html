@@ -2,7 +2,6 @@
 
 {{ block content }}
 
-
 <p><strong>Examples</strong></p>
 
 <p>
@@ -56,10 +55,89 @@ If the <strong>Performance rule</strong> applies instead with an <strong>80% cha
 {{ endif }}
 
 
+<!-- Navigation buttons -->
+<div style="
+    margin-top: 24px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+">
+  <button
+    type="button"
+    class="btn btn-secondary"
+    onclick="openReviewPopup()"
+  >
+    Review previous page
+  </button>
 
-<div style="margin-top: 24px; display: flex; gap: 12px; align-items: center;">
-  {{ back_button }}
   {{ next_button }}
 </div>
+
+
+<!-- Review popup -->
+<div id="reviewPopup"
+     style="
+       display: none;
+       position: fixed;
+       z-index: 1000;
+       left: 0;
+       top: 0;
+       width: 100%;
+       height: 100%;
+       background-color: rgba(0,0,0,0.45);
+       overflow: auto;
+     ">
+
+  <div style="
+       background-color: white;
+       max-width: 700px;
+       margin: 8% auto;
+       padding: 28px;
+       border-radius: 6px;
+       box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+       ">
+
+    <p>
+      To determine <strong>the chance that the Performance rule applies</strong>,
+      a number is randomly drawn from the following values (each equally likely):
+    </p>
+
+    <p style="text-align: center; font-size: 1.05em; margin-top: 18px; margin-bottom: 18px;">
+      0%, 10%, 20%, 30%, 40%, 50%, 60%, 70%, 80%, 90%, 100%
+    </p>
+
+    <p>
+      The <strong>Random rule</strong> applies with the <strong>remaining chance</strong>.
+      For example, if 40% is drawn, the Performance rule applies with a 40% chance,
+      and the Random rule applies with a 60% chance.
+    </p>
+
+    <p>
+      Please note: You will not learn the drawn number or the applied rule.
+    </p>
+
+    <div style="margin-top: 24px;">
+      <button
+        type="button"
+        class="btn btn-primary"
+        onclick="closeReviewPopup()"
+      >
+        Close
+      </button>
+    </div>
+
+  </div>
+</div>
+
+
+<script>
+function openReviewPopup() {
+    document.getElementById('reviewPopup').style.display = 'block';
+}
+
+function closeReviewPopup() {
+    document.getElementById('reviewPopup').style.display = 'none';
+}
+</script>
 
 {{ endblock }}

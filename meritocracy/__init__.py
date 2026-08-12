@@ -13,7 +13,6 @@ Meritocracy experiment skeleton.
 
 WAIT_PAGE_TIMEOUT = 5 * 60  # 5 minutes
 
-
 class C(BaseConstants):
     NAME_IN_URL = 'meritocracy'
     PLAYERS_PER_GROUP = 2
@@ -226,6 +225,13 @@ class Player(BasePlayer):
     other_player_total_correct = models.IntegerField(initial=0)
     stop_part1 = models.BooleanField(initial=False)
     action = models.StringField(blank=True)
+
+    # --- Puzzle interaction timing ---
+    puzzle_first_answer_ms = models.IntegerField(blank=True)
+    puzzle_submit_ms = models.IntegerField(blank=True)
+    puzzle_answer_clicks = models.IntegerField(initial=0)
+    puzzle_interaction_log = models.LongStringField(blank=True)
+    puzzle_timed_out = models.BooleanField(initial=False)
 
     # --- Part 2 outcome mechanism (moved from Group to Player) ---
     # For a real 2-player match, both players' rows are set to mirrored/
@@ -604,8 +610,6 @@ class AICheck(Page):
 
 
 
-
-
 class InstructionsPart1(Page):
     @staticmethod
     def is_displayed(player: Player):
@@ -620,7 +624,7 @@ class InstructionsPart1(Page):
 
 
 class InstructionsPart1Competition(Page):
-    allow_back_button = True
+
 
     @staticmethod
     def is_displayed(player: Player):
@@ -635,7 +639,7 @@ class InstructionsPart1Competition(Page):
 
 
 class InstructionsPart1Timing(Page):
-    allow_back_button = True
+    
 
     @staticmethod
     def is_displayed(player: Player):
@@ -651,7 +655,14 @@ class InstructionsPart1Start(Page):
 
 class Puzzle(Page):
     form_model = 'player'
-    form_fields = ['answer', 'action']   # IMPORTANT
+    form_fields = [
+        'answer',
+        'action',
+        'puzzle_first_answer_ms',
+        'puzzle_submit_ms',
+        'puzzle_answer_clicks',
+        'puzzle_interaction_log',
+    ]
 
     timeout_seconds = 120
 
@@ -676,6 +687,8 @@ class Puzzle(Page):
 
     @staticmethod
     def before_next_page(player: Player, timeout_happened):
+        player.puzzle_timed_out = timeout_happened
+        
         # If they clicked "Stop", remember this round
         if player.action == 'stop':
             player.stop_part1 = True
@@ -690,7 +703,11 @@ class Puzzle(Page):
 
 
 
+class Part1Feedback(Page):
 
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == C.NUM_ROUNDS
 
 
 class InstructionsPart2(Page):
@@ -707,7 +724,7 @@ class InstructionsPart2(Page):
 
 
 class InstructionsPart2Rules(Page):
-    allow_back_button = True
+    
 
     @staticmethod
     def is_displayed(player: Player):
@@ -721,7 +738,7 @@ class InstructionsPart2Rules(Page):
         )
 
 class InstructionsPart2Probability(Page):
-    allow_back_button = True
+    
 
     @staticmethod
     def is_displayed(player: Player):
@@ -729,7 +746,7 @@ class InstructionsPart2Probability(Page):
 
 
 class InstructionsPart2Examples(Page):
-    allow_back_button = True
+    
 
     @staticmethod
     def is_displayed(player: Player):
@@ -740,7 +757,7 @@ class InstructionsPart2Examples(Page):
 
 
 class InstructionsPart2Animation(Page):
-    allow_back_button = True
+    
 
     @staticmethod
     def is_displayed(player: Player):
@@ -753,7 +770,7 @@ class InstructionsPart2Animation(Page):
 
 
 class InstructionsPart2ComprehensionIntro(Page):
-    allow_back_button = True
+    
 
     @staticmethod
     def is_displayed(player: Player):
@@ -764,7 +781,7 @@ class InstructionsPart2ComprehensionIntro(Page):
 
 
 class Comprehension(Page):
-    allow_back_button = True
+    
     form_model = 'player'
     form_fields = [
         'cq1', 'cq2', 'cq3', 'cq5',
@@ -1005,6 +1022,7 @@ page_sequence = [
     InstructionsPart1Timing,
     Puzzle,
     ConfidenceCheck,
+    Part1Feedback,
     InstructionsPart2,
     InstructionsPart2Rules,
     InstructionsPart2Probability,

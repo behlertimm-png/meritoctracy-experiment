@@ -7,7 +7,7 @@ The animation below illustrates how the random draw determines whether the Perfo
 </p>
 
 <p>
-Please recall: you will learn the drawn number and the applied rule only at the end of the study.
+Please recall: in Part 2, you will not learn the drawn number or the applied rule.
 </p>
 
 <p>
@@ -226,7 +226,7 @@ async function runSequence() {
   await delay(700);
   showBar(30, 3);
 
-  await delay(9000);   // hold the 30% example longer
+  await delay(14000);   // hold the 30% example longer
 
   // Reset
   hideBar();
@@ -263,9 +263,121 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 
 
-<div style="margin-top: 24px; display: flex; gap: 12px; align-items: center;">
-  {{ back_button }}
+
+<!-- Navigation buttons -->
+<div style="
+    margin-top: 24px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+">
+  <button
+    type="button"
+    class="btn btn-secondary"
+    onclick="openReviewPopup()"
+  >
+    Review previous page
+  </button>
+
   {{ next_button }}
 </div>
+
+<!-- Review popup -->
+<div id="reviewPopup"
+     style="
+       display: none;
+       position: fixed;
+       z-index: 1000;
+       left: 0;
+       top: 0;
+       width: 100%;
+       height: 100%;
+       background-color: rgba(0,0,0,0.45);
+       overflow: auto;
+     ">
+
+  <div style="
+       background-color: white;
+       max-width: 850px;
+       margin: 8% auto;
+       padding: 28px;
+       border-radius: 6px;
+       box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+       ">
+
+    <p><strong>Examples</strong></p>
+
+    <p>
+      If the <strong>Performance rule</strong> applies with a <strong>20% chance</strong>, this can be interpreted as follows:
+    </p>
+
+    {{ if player.framing == 'iq' }}
+    <ul>
+      <li>
+        In 20 out of 100 cases, the winner is the participant who solved more puzzles in Part 1.
+      </li>
+      <li>
+        In the remaining 80 out of 100 cases, the computer selects the winner at random,
+        giving both participants an equal chance.
+      </li>
+    </ul>
+    {{ else }}
+    <ul>
+      <li>
+        In 20 out of 100 cases, the winner is the participant who solved more questions in Part 1.
+      </li>
+      <li>
+        In the remaining 80 out of 100 cases, the computer selects the winner at random,
+        giving both participants an equal chance.
+      </li>
+    </ul>
+    {{ endif }}
+
+    <p>
+      If the <strong>Performance rule</strong> applies instead with an <strong>80% chance</strong>, this can be interpreted as follows:
+    </p>
+
+    {{ if player.framing == 'iq' }}
+    <ul>
+      <li>
+        In 80 out of 100 cases, the winner is the participant who solved more puzzles in Part 1.
+      </li>
+      <li>
+        In the remaining 20 out of 100 cases, the computer selects the winner at random.
+      </li>
+    </ul>
+    {{ else }}
+    <ul>
+      <li>
+        In 80 out of 100 cases, the winner is the participant who solved more questions in Part 1.
+      </li>
+      <li>
+        In the remaining 20 out of 100 cases, the computer selects the winner at random.
+      </li>
+    </ul>
+    {{ endif }}
+
+    <div style="margin-top: 24px;">
+      <button
+        type="button"
+        class="btn btn-primary"
+        onclick="closeReviewPopup()"
+      >
+        Close
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function openReviewPopup() {
+    document.getElementById('reviewPopup').style.display = 'block';
+}
+
+function closeReviewPopup() {
+    document.getElementById('reviewPopup').style.display = 'none';
+}
+</script>
 
 {{ endblock }}
