@@ -1,0 +1,93 @@
+{{ block title }}
+Background questions
+{{ endblock }}
+
+{{ block content }}
+
+<p>
+Finally, we would like to ask you a few questions about yourself.
+</p>
+
+<div style="margin-top: 24px;">
+
+  {{ formfield 'age' }}
+
+  {{ formfield 'gender' }}
+
+  {{ formfield 'education' }}
+
+  {{ formfield 'employ' }}
+
+  {{ formfield 'income' }}
+
+  {{ formfield 'origin_father' }}
+
+  {{ formfield 'origin_mother' }}
+
+  {{ formfield 'stand' }}
+
+  {{ formfield 'vote' }}
+
+  <div id="voteYesContainer" style="display: none;">
+    {{ formfield 'vote_yes' }}
+  </div>
+
+  <div id="voteNoContainer" style="display: none;">
+    {{ formfield 'vote_no' }}
+  </div>
+
+  {{ formfield 'region' }}
+
+</div>
+
+<div style="margin-top: 24px;">
+  {{ next_button }}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const voteYesContainer = document.getElementById('voteYesContainer');
+    const voteNoContainer = document.getElementById('voteNoContainer');
+
+    function updateVoteFollowup() {
+
+        const selectedVote = document.querySelector('input[name="vote"]:checked');
+
+        if (!selectedVote) {
+            voteYesContainer.style.display = 'none';
+            voteNoContainer.style.display = 'none';
+            return;
+        }
+
+        if (selectedVote.value === 'True') {
+            voteYesContainer.style.display = 'block';
+            voteNoContainer.style.display = 'none';
+
+            const noInputs = voteNoContainer.querySelectorAll('input');
+            noInputs.forEach(function(input) {
+                input.checked = false;
+            });
+
+        } else if (selectedVote.value === 'False') {
+            voteYesContainer.style.display = 'none';
+            voteNoContainer.style.display = 'block';
+
+            const yesInputs = voteYesContainer.querySelectorAll('input');
+            yesInputs.forEach(function(input) {
+                input.checked = false;
+            });
+        }
+    }
+
+    const voteInputs = document.querySelectorAll('input[name="vote"]');
+
+    voteInputs.forEach(function(input) {
+        input.addEventListener('change', updateVoteFollowup);
+    });
+
+    updateVoteFollowup();
+});
+</script>
+
+{{ endblock }}

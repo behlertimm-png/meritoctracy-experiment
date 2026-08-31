@@ -232,6 +232,9 @@ class Player(BasePlayer):
     puzzle_answer_clicks = models.IntegerField(initial=0)
     puzzle_interaction_log = models.LongStringField(blank=True)
     puzzle_timed_out = models.BooleanField(initial=False)
+    part1_stopped_early = models.BooleanField(initial=False)
+    part1_stop_round = models.IntegerField(blank=True)
+
 
     # --- Part 2 outcome mechanism (moved from Group to Player) ---
     # For a real 2-player match, both players' rows are set to mirrored/
@@ -241,6 +244,8 @@ class Player(BasePlayer):
     # player's row is set independently inside finalize_singleton_outcome().
     is_fallback_match = models.BooleanField(initial=False)
     fallback_donor_id = models.StringField(blank=True)
+    matching_wait_seconds = models.FloatField(blank=True)
+
 
     part1_winner = models.BooleanField(initial=False)
     p_performance = models.IntegerField(initial=0)
@@ -372,6 +377,167 @@ class Player(BasePlayer):
     ai_check_code = models.StringField(blank=True)
 
 
+    # Demographics
+
+    age = models.IntegerField(
+        label='Age',
+        min=18,
+        max=100,
+    )
+
+    gender = models.StringField(
+        widget=widgets.RadioSelect,
+        label='Gender',
+        choices=[
+            'Male',
+            'Female',
+            'Non-binary',
+            'Prefer not to say',
+        ]
+    )
+
+    education = models.StringField(
+        widget=widgets.RadioSelect,
+        label='What is the highest level of education you have completed?',
+        choices=[
+            'Less than high school',
+            'High school diploma or GED',
+            'Some college, but no degree',
+            'Associate degree',
+            "Bachelor's degree",
+            "Master's degree",
+            'Professional degree or doctorate',
+            'Prefer not to say',
+        ]
+    )
+
+    employ = models.StringField(
+        widget=widgets.RadioSelect,
+        label='What is your current employment status?',
+        choices=[
+            'Employed full-time',
+            'Employed part-time',
+            'Self-employed',
+            'Unemployed and looking for work',
+            'Not currently working and not looking for work',
+            'Student',
+            'Retired',
+            'Prefer not to say',
+        ]
+    )
+
+    income = models.StringField(
+        widget=widgets.RadioSelect,
+        label='What was your total household income before taxes last year?',
+        choices=[
+            'Less than $25,000',
+            '$25,000–$39,999',
+            '$40,000–$54,999',
+            '$55,000–$69,999',
+            '$70,000–$84,999',
+            '$85,000–$99,999',
+            '$100,000–$149,999',
+            '$150,000–$199,999',
+            '$200,000 or more',
+            'Prefer not to say',
+        ]
+    )
+
+    origin_father = models.StringField(
+        widget=widgets.RadioSelect,
+        label='Where was your father born?',
+        choices=[
+            'United States',
+            'Canada',
+            'Mexico',
+            'Central America or the Caribbean',
+            'South America',
+            'Europe',
+            'Africa',
+            'Asia',
+            'Oceania',
+            'Prefer not to say',
+        ]
+    )
+
+    origin_mother = models.StringField(
+        widget=widgets.RadioSelect,
+        label='Where was your mother born?',
+        choices=[
+            'United States',
+            'Canada',
+            'Mexico',
+            'Central America or the Caribbean',
+            'South America',
+            'Europe',
+            'Africa',
+            'Asia',
+            'Oceania',
+            'Prefer not to say',
+        ]
+    )
+
+    stand = models.IntegerField(
+    label='In politics, people sometimes describe themselves as liberal or conservative. Where would you place yourself on the following scale?',
+    choices=[
+        (1, '1 - Very liberal'),
+        (2, '2'),
+        (3, '3'),
+        (4, '4 - Moderate'),
+        (5, '5'),
+        (6, '6'),
+        (7, '7 - Very conservative'),
+    ],
+    widget=widgets.RadioSelect,
+    )
+
+
+    vote = models.BooleanField(
+        widget=widgets.RadioSelect,
+        label='Did you vote in the 2024 U.S. presidential election?',
+        choices=[
+            (True, 'Yes'),
+            (False, 'No'),
+        ]
+    )
+
+    vote_yes = models.StringField(
+        widget=widgets.RadioSelect,
+        label='In the 2024 U.S. presidential election, which candidate did you vote for?',
+        choices=[
+            'Kamala Harris',
+            'Donald Trump',
+            'Another candidate',
+            'Prefer not to say',
+        ],
+        blank=True,
+    )
+
+    vote_no = models.StringField(
+        widget=widgets.RadioSelect,
+        label='Even if you did not vote, which candidate would you have been most likely to vote for?',
+        choices=[
+            'Kamala Harris',
+            'Donald Trump',
+            'Another candidate',
+            'Prefer not to say',
+        ],
+        blank=True,
+    )
+
+    region = models.StringField(
+        widget=widgets.RadioSelect,
+        label='In which region of the United States do you currently live?',
+        choices=[
+            'Northeast',
+            'Midwest',
+            'South',
+            'West',
+            'Prefer not to say',
+        ]
+    )
+
+# for payoffs
 def set_payoffs(player: Player):
     prize = player.prize
 
@@ -421,8 +587,15 @@ def _compute_total_correct(player):
     for pr in player.in_all_rounds():
         if pr.field_maybe_none('is_correct'):
             total += 1
+
     player.total_correct = total
 
+    stop_round = player.participant.vars.get('stop_round')
+
+    if stop_round is not None:
+        player.part1_stopped_early = True
+        player.part1_stop_round = stop_round
+        
 
 def finalize_pair_outcome(p1: Player, p2: Player):
     """Two real live players, paired normally (group_by_arrival_time_method
@@ -506,6 +679,7 @@ def finalize_singleton_outcome(player: Player):
         player.part1_winner if player.paying_part == 1 else player.part2_winner
     )
 
+    
 
 class Consent(Page):
     form_model = 'player'
@@ -688,7 +862,7 @@ class Puzzle(Page):
     @staticmethod
     def before_next_page(player: Player, timeout_happened):
         player.puzzle_timed_out = timeout_happened
-        
+
         # If they clicked "Stop", remember this round
         if player.action == 'stop':
             player.stop_part1 = True
@@ -743,6 +917,12 @@ class InstructionsPart2Probability(Page):
     @staticmethod
     def is_displayed(player: Player):
         return player.round_number == C.NUM_ROUNDS and not player.participant.timed_out
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(
+            prize_formatted=f'{player.prize:.0f}'
+        )
 
 
 class InstructionsPart2Examples(Page):
@@ -840,6 +1020,7 @@ class Comprehension(Page):
 
 class WaitForScoring(WaitPage):
     group_by_arrival_time = True
+    template_name = 'meritocracy/WaitForScoring.html'
 
     @staticmethod
     def is_displayed(player: Player):
@@ -855,6 +1036,14 @@ class WaitForScoring(WaitPage):
     @staticmethod
     def after_all_players_arrive(group: Group):
         players = group.get_players()
+
+        now = time.time()
+
+        for p in players:
+            wait_started = p.participant.vars.get('meritocracy_wait_started_at')
+            if wait_started is not None:
+                p.matching_wait_seconds = now - wait_started
+
         if len(players) == 2:
             finalize_pair_outcome(players[0], players[1])
         else:
@@ -996,6 +1185,35 @@ class ConfidenceCheck(Page):
         return player.round_number == C.NUM_ROUNDS and not player.participant.timed_out
 
 
+class Demographics(Page):
+    form_model = 'player'
+    form_fields = [
+        'age',
+        'gender',
+        'education',
+        'employ',
+        'income',
+        'origin_father',
+        'origin_mother',
+        'stand',
+        'vote',
+        'vote_yes',
+        'vote_no',
+        'region',
+    ]
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == C.NUM_ROUNDS
+        
+    @staticmethod
+    def error_message(player: Player, values):
+        if values['vote'] is True and not values['vote_yes']:
+            return 'Please indicate which candidate you voted for.'
+
+        if values['vote'] is False and not values['vote_no']:
+            return 'Please indicate which candidate you would have been most likely to vote for.'
+
 class End(Page):
     @staticmethod
     def is_displayed(player: Player):
@@ -1024,7 +1242,6 @@ page_sequence = [
     ConfidenceCheck,
     Part1Feedback,
     InstructionsPart2,
-    InstructionsPart2Rules,
     InstructionsPart2Probability,
     InstructionsPart2Examples,
     InstructionsPart2Animation,
@@ -1034,5 +1251,6 @@ page_sequence = [
     OutcomeCalculation,
     DummyOutcome,
     # WebcamCheck,
+    Demographics,
     End,
 ]

@@ -41,11 +41,17 @@
 </style>
 
 <p>
-Thank you for your effort in Part 1.  
+Thank you for your effort in Part 1.
 </p>
 
 <p>
-What do you think is the chance that you solved more puzzles than your paired participant in Part 1?
+What do you think is the chance that you solved more
+{% if player.framing == 'iq' %}
+puzzles
+{% else %}
+questions
+{% endif %}
+than your paired participant in Part 1?
 </p>
 
 <p>
@@ -54,14 +60,22 @@ Please choose a number on the slider below from 0% to 100%.
 
 <ul>
   <li>
-    If you chose 100%, this means that you are absolutely certain that you solved more puzzles.
+    If you chose 100%, this means that you are absolutely certain that you solved more
+    {% if player.framing == 'iq' %}
+    puzzles.
+    {% else %}
+    questions.
+    {% endif %}
   </li>
   <li>
-    If you chose 0%, this means that you are absolutely certain you solved fewer puzzles.
+    If you chose 0%, this means that you are absolutely certain you solved fewer
+    {% if player.framing == 'iq' %}
+    puzzles.
+    {% else %}
+    questions.
+    {% endif %}
   </li>
 </ul>
-
-
 
 {{ formfield_errors 'final_guess_more_puzzles' }}
 
