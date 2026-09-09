@@ -76,38 +76,54 @@ You may stop solving questions <strong>at any time</strong> and continue with Pa
     {{ if player.framing == 'iq' }}
 
     <p>
-      In Part 1, you can work on as many <strong>puzzles</strong> as you like.
-      The total number of puzzles exceeds what most participants can complete.
+      In Part 1, you can work on as many <strong>puzzles</strong> as you like —
+      the total number of <strong>puzzles</strong> <strong>exceeds</strong> what most participants can complete.
     </p>
 
     <p>
-      You are <strong>paired with another participant</strong>.
-      If you correctly solve more puzzles than your paired participant,
-      you <strong>win Part 1</strong>.
+      To determine your bonus earnings in this part, you will be
+      <strong>paired with another participant</strong> in this study.
+      Your bonus depends on how your performance compares to theirs.
     </p>
 
-    <p>
-      If both of you solve the same number of puzzles correctly,
-      each participant is <strong>equally likely</strong> to win Part 1.
-    </p>
+    <ul>
+      <li>
+        If you <strong>correctly solve a larger number of puzzles</strong>
+        than your paired participant, you will win and receive a bonus of
+        <strong>${{ prize_formatted }}</strong>.
+      </li>
+
+      <li>
+        If there is a <strong>tie</strong> (that is, each of you solves the same number of
+        <strong>puzzles</strong>), each of you is <strong>equally</strong> likely to win.
+      </li>
+    </ul>
 
     {{ else }}
 
     <p>
-      In Part 1, you can work on as many <strong>questions</strong> as you like.
-      The total number of questions exceeds what most participants can complete.
+      In Part 1, you can work on as many <strong>questions</strong> as you like —
+      the total number of <strong>questions</strong> <strong>exceeds</strong> what most participants can complete.
     </p>
 
     <p>
-      You are <strong>paired with another participant</strong>.
-      If you correctly solve more questions than your paired participant,
-      you <strong>win Part 1</strong>.
+      To determine your bonus earnings in this part, you will be
+      <strong>paired with another participant</strong> in this study.
+      Your bonus depends on how your performance compares to theirs.
     </p>
 
-    <p>
-      If both of you solve the same number of questions correctly,
-      each participant is <strong>equally likely</strong> to win Part 1.
-    </p>
+    <ul>
+      <li>
+        If you <strong>correctly solve a larger number of questions</strong>
+        than your paired participant, you will win and receive a bonus of
+        <strong>${{ prize_formatted }}</strong>.
+      </li>
+
+      <li>
+        If there is a <strong>tie</strong> (that is, each of you solves the same number of
+        <strong>questions</strong>), each of you is <strong>equally</strong> likely to win.
+      </li>
+    </ul>
 
     {{ endif }}
 

@@ -398,7 +398,7 @@ class Player(BasePlayer):
 
     education = models.StringField(
         widget=widgets.RadioSelect,
-        label='What is the highest level of education you have completed?',
+        label='Which category best describes your <strong>highest level of education</strong>?',
         choices=[
             'Less than high school',
             'High school diploma or GED',
@@ -407,7 +407,6 @@ class Player(BasePlayer):
             "Bachelor's degree",
             "Master's degree",
             'Professional degree or doctorate',
-            'Prefer not to say',
         ]
     )
 
@@ -422,13 +421,12 @@ class Player(BasePlayer):
             'Not currently working and not looking for work',
             'Student',
             'Retired',
-            'Prefer not to say',
         ]
     )
 
     income = models.StringField(
         widget=widgets.RadioSelect,
-        label='What was your total household income before taxes last year?',
+        label='What is your <strong>annual TOTAL HOUSEHOLD income</strong> before taxes?',
         choices=[
             'Less than $25,000',
             '$25,000–$39,999',
@@ -439,7 +437,6 @@ class Player(BasePlayer):
             '$100,000–$149,999',
             '$150,000–$199,999',
             '$200,000 or more',
-            'Prefer not to say',
         ]
     )
 
@@ -818,6 +815,12 @@ class InstructionsPart1Timing(Page):
     @staticmethod
     def is_displayed(player: Player):
         return player.round_number == 1
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(
+            prize_formatted=f"{player.prize:.2f}",
+        )
 
 
 class InstructionsPart1Start(Page):
