@@ -1,120 +1,35 @@
-{{ block title }}Finished{{ endblock }}
+{{ block title }}{{ endblock }}
 
 {{ block content }}
 
-<p>Thank you for participating.</p>
-
-<h4>Your results</h4>
-<ul>
-  <li>Total correct in Part 1: <strong>{{ player.total_correct }}</strong></li>
-
-  <li>
-    Part 2 outcome:
-    <strong>
-      {{ if player.part2_winner }}
-        Won
-      {{ else }}
-        Lost
-      {{ endif }}
-    </strong>
-  </li>
-
-  <li>
-    Payoff-relevant part:
-    <strong>Part {{ player.paying_part }}</strong>
-  </li>
-
-  <li>
-    Competition bonus:
-    <strong>
-      {{ if player.paying_winner }}
-        {{ player.prize }}
-      {{ else }}
-        {{ 0 }}
-      {{ endif }}
-    </strong>
-  </li>
-</ul>
-
-<h4>Belief bonus</h4>
-<ul>
-  <li>Your guess: <strong>{{ player.belief_p_performance }}%</strong></li>
-  <li>True value: <strong>{{ player.true_p_performance }}%</strong></li>
-
-  <li>
-    Bonus earned:
-    <strong>
-      {{ if player.belief_bonus_earned }}
-        Yes
-      {{ else }}
-        No
-      {{ endif }}
-    </strong>
-  </li>
-
-  <li>Belief bonus amount: <strong>{{ player.belief_bonus_amount }}</strong></li>
-</ul>
-
-<h4>Total bonus payment</h4>
 <p>
-  Your total bonus payment is:
-  <strong>{{ player.payoff }}</strong>
+  Thank you for participating.
 </p>
 
 <p>
-  This is in addition to the fixed participation fee.
-</p>
-
-<hr>
-
-<h4>Debug information (temporary — remove before launch)</h4>
-
-<ul>
-  <li>Your id in group: <strong>{{ player.id_in_group }}</strong></li>
-  <li>Your total correct: <strong>{{ player.total_correct }}</strong></li>
-  <li>Other player's total correct: <strong>{{ player.other_player_total_correct }}</strong></li>
-  <li>Matched via fallback (donor): <strong>{{ player.is_fallback_match }}</strong></li>
-  {{ if player.is_fallback_match }}
-  <li>Donor id used: <strong>{{ player.fallback_donor_id }}</strong></li>
-  {{ endif }}
-
-  <li>Part 1 winner: <strong>{{ player.part1_winner }}</strong></li>
-
-  <li>Drawn p_performance: <strong>{{ player.p_performance }}%</strong></li>
-
-  <li>
-    Performance rule applied in Part 2:
-    <strong>
-      {{ if player.performance_rule_applies }}
-        Yes
-      {{ else }}
-        No
-      {{ endif }}
-    </strong>
-  </li>
-
-  <li>Random winner for Part 2: <strong>{{ player.random_winner }}</strong></li>
-  <li>Part 2 winner: <strong>{{ player.part2_winner }}</strong></li>
-
-  <li>Paying part: <strong>Part {{ player.paying_part }}</strong></li>
-  <li>Paying winner: <strong>{{ player.paying_winner }}</strong></li>
-
-  <li>Your belief guess: <strong>{{ player.belief_p_performance }}%</strong></li>
-  <li>True p_performance stored for you: <strong>{{ player.true_p_performance }}%</strong></li>
-  <li>Belief bonus earned: <strong>{{ player.belief_bonus_earned }}</strong></li>
-  <li>Belief bonus amount: <strong>{{ player.belief_bonus_amount }}</strong></li>
-
-  <p>
-<strong>Comprehension first-try correct:</strong> {{ comp_correct }}
+  You correctly solved {{ total_correct }} {{ task_word }} in Part 1.
 </p>
 
 <p>
-<strong>Comprehension bonus:</strong> ${{ comp_bonus_amount }}
+  Your total bonus earnings from this study are ${{ total_bonus }}.
 </p>
 
-  <li>Your final oTree payoff: <strong>{{ player.payoff }}</strong></li>
-</ul>
+<p>
+  Please click the button below to return to Prolific and complete your submission.
+</p>
 
-<p>Please click here to return to Prolific: ADD LINK</p>
+<div style="margin-top: 24px; margin-bottom: 24px;">
+  <a
+    href="https://app.prolific.com/submissions/complete?cc=CDDYYSFU"
+    class="btn btn-primary"
+  >
+    Return to Prolific
+  </a>
+</div>
+
+<p style="font-size: 0.95rem;">
+  If the link does not work, you can submit the study on Prolific using the completion code
+  <strong>CDDYYSFU</strong>.
+</p>
 
 {{ endblock }}

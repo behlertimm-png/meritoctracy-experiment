@@ -688,6 +688,11 @@ class Consent(Page):
 
     @staticmethod
     def vars_for_template(player: Player):
+        # Prolific ID is supplied through the oTree room URL as participant_label.
+        # Store it in our existing prolific_id field for the data export.
+        if player.participant.label:
+            player.prolific_id = player.participant.label
+
         prize = player.prize
         belief_bonus = player.session.config.get('belief_bonus')
         comprehension_bonus = 1.00
@@ -709,7 +714,7 @@ class Consent(Page):
     @staticmethod
     def before_next_page(player: Player, timeout_happened):
         player.participant.vars['consent_declined'] = (player.consent == 'no')
-
+    
 
 
 
@@ -1196,13 +1201,10 @@ class Demographics(Page):
         'education',
         'employ',
         'income',
-        'origin_father',
-        'origin_mother',
         'stand',
         'vote',
         'vote_yes',
         'vote_no',
-        'region',
     ]
 
     @staticmethod
@@ -1217,6 +1219,7 @@ class Demographics(Page):
         if values['vote'] is False and not values['vote_no']:
             return 'Please indicate which candidate you would have been most likely to vote for.'
 
+
 class End(Page):
     @staticmethod
     def is_displayed(player: Player):
@@ -1224,17 +1227,23 @@ class End(Page):
 
     @staticmethod
     def vars_for_template(player: Player):
-        return dict(
-            comp_correct=player.comp_correct,
-            comp_bonus_amount=player.comp_bonus_amount,
+        task_word = (
+            "puzzles"
+            if player.framing == 'iq'
+            else "questions"
         )
 
+        return dict(
+            total_correct=player.total_correct,
+            total_bonus=f"{float(player.payoff):.2f}",
+            task_word=task_word,
+        )
 
 page_sequence = [
     WaitForScoring,
     WaitTimeout,
     Consent,
-    ProlificID,
+    # ProlificID,
     ConsentDeclined,
     AIWarning,
     AICheck,
