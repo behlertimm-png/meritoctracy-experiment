@@ -364,6 +364,8 @@ class Player(BasePlayer):
         label="Your guess (0–100):",
     )
 
+    confidence_bonus_amount = models.CurrencyField(initial=0)
+
     # --- Webcam check (Archived/Unused) ---
     webcam_success = models.BooleanField(initial=False)
     webcam_error = models.LongStringField(blank=True)
@@ -546,6 +548,7 @@ def set_payoffs(player: Player):
         competition_payoff
         + player.belief_bonus_amount
         + player.comp_bonus_amount
+        + player.confidence_bonus_amount
     )
 
 
@@ -696,6 +699,7 @@ class Consent(Page):
         prize = player.prize
         belief_bonus = player.session.config.get('belief_bonus')
         comprehension_bonus = 1.00
+        confidence_bonus = 1.00
 
         if prize == 2:
             duration_text = "10 minutes"
@@ -707,7 +711,8 @@ class Consent(Page):
             prize=prize,
             belief_bonus=belief_bonus,
             comprehension_bonus=comprehension_bonus,
-            max_bonus=f"{prize + belief_bonus + comprehension_bonus:.2f}",
+            confidence_bonus=confidence_bonus,
+            max_bonus=f"{prize + belief_bonus + comprehension_bonus + confidence_bonus:.2f}",
             duration_text=duration_text,
         )
 
@@ -1191,6 +1196,24 @@ class ConfidenceCheck(Page):
     @staticmethod
     def is_displayed(player: Player):
         return player.round_number == C.NUM_ROUNDS and not player.participant.timed_out
+
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        # Reported probability, converted from 0-100 to 0-1
+        p = player.final_guess_more_puzzles / 100
+
+        # Event: participant solved strictly more puzzles correctly
+        # than their opponent. Ties count as False.
+        solved_more = player.total_correct > player.other_player_total_correct
+
+        # Quadratic scoring rule, maximum bonus $1
+        if solved_more:
+            bonus = 1 - (1 - p) ** 2
+        else:
+            bonus = 1 - p ** 2
+
+        # Store bonus rounded to cents
+        player.confidence_bonus_amount = cu(round(bonus, 2))
 
 
 class Demographics(Page):

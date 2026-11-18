@@ -1,3 +1,4 @@
+
 {{ block title }}{{ endblock }}
 
 {{ block content }}
@@ -45,7 +46,7 @@ Thank you for your effort in Part 1.
 </p>
 
 <p>
-What do you think is the chance that you solved more
+What do you think is the chance that you correctly solved more
 {% if player.framing == 'iq' %}
 puzzles
 {% else %}
@@ -55,12 +56,19 @@ than your paired participant in Part 1?
 </p>
 
 <p>
+Depending on the accuracy of your guess, you receive a bonus of up to <strong>$1</strong>.
+To maximize your bonus, simply report your <strong>honest best estimate</strong>;
+there is no advantage to strategic guessing.
+Details of the payment rule are available on request at the end of the study.
+</p>
+
+<p>
 Please choose a number on the slider below from 0% to 100%.
 </p>
 
 <ul>
   <li>
-    If you chose 100%, this means that you are absolutely certain that you solved more
+    If you chose 100%, this means that you are absolutely certain that you correctly solved more
     {% if player.framing == 'iq' %}
     puzzles.
     {% else %}
@@ -68,12 +76,13 @@ Please choose a number on the slider below from 0% to 100%.
     {% endif %}
   </li>
   <li>
-    If you chose 0%, this means that you are absolutely certain you solved fewer
+    If you chose 0%, this means that you are absolutely certain that you did not correctly solve more
     {% if player.framing == 'iq' %}
-    puzzles.
+    puzzles
     {% else %}
-    questions.
+    questions
     {% endif %}
+    than your paired participant (including the possibility of a tie).
   </li>
 </ul>
 
